@@ -105,24 +105,52 @@ User interacts with React page
 → React updates the UI
 ```
 
-## Repository Pattern in Laravel
+## Repository Pattern
+To apply the Repository Pattern explicitly, a dedicated Repositories/ 
+layer was created under backend/app/Repositories/.
 
-The assignment requires implementation of the Repository Pattern. In 
-Laravel this pattern is implemented natively through Eloquent ORM. 
-Rather than creating a redundant abstraction layer on top of Eloquent, 
-the pattern's responsibilities are mapped directly to existing Laravel 
-components:
+An interface IRepository defines the contract for all data access 
+operations:
 
-| Repository Pattern | Laravel Equivalent |
-|------|---|
-| GetAll() | Model::all() |
-| GetById() | Model::find($id) |
-| Add() | Model::create($data) |
-| Save() | $model->save() |
+- getAll() — retrieve all records
+- getById($id) — retrieve a single record by its ID
+- add(array $data) — insert a new record
+- save($model) — persist changes to an existing record
 
-Each Model in MediCore acts as its own repository. For example, 
-Appointment::where('doctor_id', $id)->get() retrieves all appointments 
-for a doctor — the equivalent of a filtered GetAll() call. 
+AppointmentRepository implements this interface using Laravel's Eloquent 
+ORM. This means the controller that handles appointments does not 
+directly query the database — it works through the repository instead. 
+The benefit is that the data access method can be swapped out without 
+touching the controller at all.
+
+| IRepository Method | Eloquent Implementation |
+|---|---|
+| getAll() | Appointment::all() |
+| getById($id) | Appointment::find($id) |
+| add(array $data) | Appointment::create($data) |
+| save($model) | $model->save() |
+
+---
+
+## SOLID Principles
+
+The Single Responsibility Principle (S in SOLID) is deliberately applied 
+in MediCore in two places:
+
+**DosageCalculatorService** has one job — performing the pediatric dosage 
+calculation. It knows nothing about HTTP requests, database writes, or 
+API responses. The DosageController calls it, takes the result, and 
+handles the response. If the formula ever changes, only this file needs 
+to be touched.
+
+**RoleMiddleware** has one job — checking whether the authenticated user 
+has the correct role for the route they are trying to access. It does 
+not handle authentication itself (that is Sanctum's job) and it does not 
+run any business logic. It either allows the request through or blocks 
+it with a 403 response.
+
+Both of these are deliberate architectural decisions to keep each class 
+focused on a single responsibility.
 ---
 
 ## Reasons for Architectural Decisions
