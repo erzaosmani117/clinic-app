@@ -122,10 +122,7 @@ components:
 
 Each Model in MediCore acts as its own repository. For example, 
 Appointment::where('doctor_id', $id)->get() retrieves all appointments 
-for a doctor — the equivalent of a filtered GetAll() call. This is the 
-idiomatic Laravel approach and is consistent with how production Laravel 
-applications handle data access.
-
+for a doctor — the equivalent of a filtered GetAll() call. 
 ---
 
 ## Reasons for Architectural Decisions
