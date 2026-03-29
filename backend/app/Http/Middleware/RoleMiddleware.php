@@ -14,7 +14,6 @@ class RoleMiddleware
                 'message' => 'Unauthorized. You do not have access to this resource.'
             ], 403);
         }
-
         return $next($request);
     }
 }
