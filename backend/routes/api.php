@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\DoctorController;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -13,10 +15,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Patient only routes
     Route::middleware('role:patient')->group(function () {
-        // appointments will go here
+        Route::get('/doctors', [DoctorController::class, 'index']);
+        Route::post('/appointments', [AppointmentController::class, 'store']);
+        Route::get('/my-appointments', [AppointmentController::class, 'patientAppointments']);
     });
 
     // Doctor only routes
-   Route::middleware('role:doctor')->group(function () {
-});
+    Route::middleware('role:doctor')->group(function () {
+        Route::get('/doctor-appointments', [AppointmentController::class, 'doctorAppointments']);
+    });
 });

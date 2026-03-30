@@ -18,19 +18,60 @@ class AuthController extends Controller
             'role'     => 'in:patient,doctor',
         ]);
 
+        //What does create do:
+//  1. Take your input array
+// 2. Create a User object internally
+// 3. INSERT into database (users table)
+// 4. Get the inserted row (with ID)
+// 5. Return the User object (now synced with DB)
         $user = User::create([
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
             'role'     => $request->role ?? 'patient',
         ]);
-
+         //API token represents the logged-in user
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'user'  => $user,
             'token' => $token,
         ], 201);
+
+//         1. Login/Register
+// Laravel:
+//   → creates token
+//   → sends { user, token }
+
+// React:
+//   → stores token
+// 2. User makes request (e.g. appointments)
+// React:
+//   → sends request with token
+
+// Laravel:
+//   → reads token
+//   → finds matching user
+//   → sets auth()->user()
+
+// - If token valid → request continues
+// - If token invalid → 401 Unauthorized
+
+// Login:
+//   → get token
+
+// Every request:
+//   → send token
+
+// Laravel:
+//   → verify token
+//   → identify user
+//   → allow or deny access
+
+// One user can have many tokens:
+// Token 1 → Chrome
+// Token 2 → Mobile app
+// Token 3 → Firefox
     }
 
     public function login(Request $request)
