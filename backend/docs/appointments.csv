@@ -1,6 +1,11 @@
 id,patient_name,doctor_name,date,status
-1,John Smith,Dr. Alice Brown,2026-04-10,confirmed
-2,Emily Johnson,Dr. Alice Brown,2026-04-11,confirmed
-3,Michael Davis,Dr. Robert Wilson,2026-04-12,confirmed
-4,Sarah Martinez,Dr. Robert Wilson,2026-04-14,confirmed
-5,James Anderson,Dr. Alice Brown,2026-04-15,confirmed
+1,"John Smith","Dr. Alice Brown",2026-04-10,cancelled
+2,"Emily Johnson","Dr. Alice Brown",2026-04-11,confirmed
+3,"Michael Davis","Dr. Robert Wilson",2026-04-12,confirmed
+4,"Sarah Martinez","Dr. Robert Wilson",2026-04-14,confirmed
+5,"Emily Doe","Dr. Alice Brown",2026-05-11,confirmed
+6,"David Davis","Dr. Robert Wilson",2026-04-23,confirmed
+7,"Sheldon Brown","Dr. Robert Wilson",2026-04-18,confirmed
+8,"Jane Smith","Dr. Alice Brown",2026-06-12,confirmed
+9,"Ary Sims","Dr. Robert Wilson",2026-04-03,confirmed
+10,"Milly Cooper","Dr. Robert Wilson",2026-05-20,confirmed
