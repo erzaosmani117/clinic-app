@@ -6,6 +6,7 @@ import api from '../api/axios';
 export default function DoctorDashboard() {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    const [filterDate, setFilterDate] = useState('');
 
     const [appointments, setAppointments] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -34,6 +35,10 @@ export default function DoctorDashboard() {
         logout();
         navigate('/login');
     };
+
+    const filteredAppointments = filterDate
+    ? appointments.filter(a => a.date === filterDate)
+    : appointments;
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -103,6 +108,24 @@ export default function DoctorDashboard() {
                         </p>
                     </div>
                 </div>
+
+                <div className="flex items-center gap-3 mb-6">
+    <input
+        type="date"
+        value={filterDate}
+        onChange={(e) => setFilterDate(e.target.value)}
+        className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+    />
+    {filterDate && (
+        <button
+            onClick={() => setFilterDate('')}
+            className="text-sm text-gray-400 hover:text-gray-600 transition"
+        >
+            Clear filter
+        </button>
+    )}
+</div>
+
 
                 {/* Appointments */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
