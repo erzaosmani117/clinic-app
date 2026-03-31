@@ -21,7 +21,7 @@ interface IRepository {
     public function delete($id);
 }
 ```
-
+Check screenshots folder to see the output
 **Two implementations of the same interface:**
 
 - `AppointmentRepository` — reads and writes from MySQL database using Eloquent ORM
