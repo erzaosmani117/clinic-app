@@ -1,0 +1,6 @@
+id,patient_name,doctor_name,date,status
+1,John Smith,Dr. Alice Brown,2026-04-10,confirmed
+2,Emily Johnson,Dr. Alice Brown,2026-04-11,confirmed
+3,Michael Davis,Dr. Robert Wilson,2026-04-12,confirmed
+4,Sarah Martinez,Dr. Robert Wilson,2026-04-14,confirmed
+5,James Anderson,Dr. Alice Brown,2026-04-15,confirmed

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\DoctorController;
+use App\Http\Controllers\FileAppointmentController;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -12,6 +13,11 @@ Route::post('/login',    [AuthController::class, 'login']);
 // Authenticated routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/file-appointments', [FileAppointmentController::class, 'index']);
+    Route::get('/file-appointments/{id}', [FileAppointmentController::class, 'show']);
+    Route::post('/file-appointments', [FileAppointmentController::class, 'store']);
+    Route::put('/file-appointments/{id}', [FileAppointmentController::class, 'update']);
+    Route::delete('/file-appointments/{id}', [FileAppointmentController::class, 'destroy']);
 
     // Patient only routes
     Route::middleware('role:patient')->group(function () {

@@ -8,4 +8,5 @@ interface IRepository
     public function getById($id);
     public function add(array $data);
     public function save($model);
+    public function delete($id);
 }

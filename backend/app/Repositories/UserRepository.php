@@ -2,23 +2,23 @@
 
 namespace App\Repositories;
 
-use App\Models\Appointment;
+use App\Models\User;
 
-class AppointmentRepository implements IRepository
+class UserRepository implements IRepository
 {
     public function getAll()
     {
-        return Appointment::all();
+        return User::all();
     }
 
     public function getById($id)
     {
-        return Appointment::find($id);
+        return User::find($id);
     }
 
     public function add(array $data)
     {
-        return Appointment::create($data);
+        return User::create($data);
     }
 
     public function save($model)
