@@ -1,0 +1,158 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import api from '../api/axios';
+
+const categoryIcons = {
+    antibiotics: (
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+    ),
+    respiratory: (
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+    ),
+    fever: (
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+    ),
+    gastro: (
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    ),
+    ear_eye: (
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+    ),
+    vitamins: (
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+    ),
+};
+
+const categoryColors = {
+    antibiotics: 'bg-blue-50 text-blue-600 border-blue-100',
+    respiratory: 'bg-red-50 text-red-500 border-red-100',
+    fever: 'bg-orange-50 text-orange-500 border-orange-100',
+    gastro: 'bg-green-50 text-green-600 border-green-100',
+    ear_eye: 'bg-purple-50 text-purple-600 border-purple-100',
+    vitamins: 'bg-yellow-50 text-yellow-600 border-yellow-100',
+};
+
+export default function DosageHome() {
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
+
+    const [categories, setCategories] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        fetchCategories();
+    }, []);
+
+    const fetchCategories = async () => {
+        try {
+            setError('');
+            const res = await api.get('/drug-categories');
+            setCategories(res.data);
+        } catch (err) {
+            setError('Failed to load drug categories. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleLogout = async () => {
+        try {
+            await api.post('/logout');
+        } catch (err) {
+            console.error('Logout error');
+        }
+        logout();
+        navigate('/login');
+    };
+
+    return (
+        <div className="min-h-screen bg-gray-50">
+            {/* Navbar */}
+            <nav className="bg-[#0a1628] shadow-lg">
+                <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 bg-blue-500 rounded-lg flex items-center justify-center">
+                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p className="text-white font-bold text-lg leading-none">PediCare</p>
+                            <p className="text-blue-300 text-xs">Pediatric Clinic</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => navigate('/doctor')}
+                            className="text-white/70 hover:text-white text-sm transition"
+                        >
+                            Dashboard
+                        </button>
+                        <button
+                            onClick={() => navigate('/dosage/history')}
+                            className="text-white/70 hover:text-white text-sm transition"
+                        >
+                            History
+                        </button>
+                        <button
+                            onClick={handleLogout}
+                            className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white text-sm px-4 py-2 rounded-lg transition"
+                        >
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+            <div className="max-w-6xl mx-auto px-6 py-10">
+                <div className="mb-10">
+                    <h1 className="text-3xl font-bold text-[#0a1628]">Drug Dosage Calculator</h1>
+                    <p className="text-gray-500 mt-1">Select a category to view available drugs</p>
+                </div>
+
+                {/* Error */}
+                {error && (
+                    <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6 text-sm flex items-center gap-2">
+                        <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {error}
+                        <button onClick={fetchCategories} className="ml-auto underline text-red-500 hover:text-red-700">Retry</button>
+                    </div>
+                )}
+
+                {/* Loading */}
+                {loading ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        {[...Array(6)].map((_, i) => (
+                            <div key={i} className="bg-white rounded-2xl border border-gray-100 p-6 animate-pulse">
+                                <div className="w-12 h-12 bg-gray-100 rounded-xl mb-4"></div>
+                                <div className="h-4 bg-gray-100 rounded w-2/3"></div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        {categories.map((cat) => (
+                            <button
+                                key={cat.id}
+                                onClick={() => navigate(`/dosage/category/${cat.id}`)}
+                                className="bg-white rounded-2xl border border-gray-100 p-6 text-left hover:shadow-md hover:border-blue-100 transition group"
+                            >
+                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 border ${categoryColors[cat.icon] || 'bg-blue-50 text-blue-600 border-blue-100'}`}>
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        {categoryIcons[cat.icon] || categoryIcons.antibiotics}
+                                    </svg>
+                                </div>
+                                <p className="font-semibold text-[#0a1628] group-hover:text-blue-600 transition">{cat.name}</p>
+                                <p className="text-gray-400 text-xs mt-1">View drugs →</p>
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}

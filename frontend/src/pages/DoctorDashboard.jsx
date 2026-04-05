@@ -119,11 +119,24 @@ export default function DoctorDashboard() {
     {filterDate && (
         <button
             onClick={() => setFilterDate('')}
-            className="text-sm text-gray-400 hover:text-gray-600 transition"
-        >
+            className="text-sm text-gray-400 hover:text-gray-600 transition">
             Clear filter
         </button>
     )}
+</div>
+
+{/* Dosage Module Button */}
+<div className="bg-[#0a1628] rounded-2xl p-6 mb-8 flex items-center justify-between">
+    <div>
+        <h2 className="text-white font-bold text-lg">Drug Dosage Calculator</h2>
+        <p className="text-blue-300 text-sm mt-1">Calculate safe pediatric drug doses by age and weight</p>
+    </div>
+    <button
+        onClick={() => navigate('/dosage')}
+        className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-2.5 rounded-xl transition shrink-0"
+    >
+        Open Calculator
+    </button>
 </div>
 
 
@@ -136,7 +149,7 @@ export default function DoctorDashboard() {
                         <div className="text-center py-16">
                             <p className="text-gray-400">Loading appointments...</p>
                         </div>
-                    ) : appointments.length === 0 ? (
+                    ) : filteredAppointments.length === 0 ? (
                         <div className="text-center py-16">
                             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -159,7 +172,7 @@ export default function DoctorDashboard() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-50">
-                                    {appointments.map((apt, index) => (
+                                    {filteredAppointments.map((apt, index)  => (
                                         <tr key={apt.id} className="hover:bg-gray-50/50 transition">
                                             <td className="py-4 pr-4 text-sm text-gray-400">{index + 1}</td>
                                             <td className="py-4 pr-4">
