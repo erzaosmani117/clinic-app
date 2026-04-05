@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class DosageHistory extends Model
 {
+
+    protected $table = 'dosage_history';
+
     protected $fillable = [
         'doctor_id',
         'drug_id',

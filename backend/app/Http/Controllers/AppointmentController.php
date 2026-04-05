@@ -19,7 +19,7 @@ class AppointmentController extends Controller
             'patient_id' => $request->user()->id,
             'doctor_id'  => $request->doctor_id,
             'date'       => $request->date,
-            'status'     => 'confirmed',
+            'status'     => 'pending',
         ]);
 
         return response()->json($appointment, 201);
@@ -46,4 +46,29 @@ class AppointmentController extends Controller
 
         return response()->json($appointments);
     }
+
+    public function updateStatus(Request $request, $id)
+{
+    $request->validate([
+        'status' => 'required|in:confirmed,cancelled',
+    ]);
+
+    $appointment = Appointment::where('id', $id)
+        ->where('doctor_id', $request->user()->id)
+        ->first();
+
+    if (!$appointment) {
+        return response()->json([
+            'message' => 'Appointment not found or unauthorized.'
+        ], 404);
+    }
+
+    $appointment->status = $request->status;
+    $appointment->save();
+
+    return response()->json([
+        'message' => 'Appointment status updated successfully.',
+        'appointment' => $appointment,
+    ]);
+}
 }
