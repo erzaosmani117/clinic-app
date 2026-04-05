@@ -5,6 +5,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\FileAppointmentController;
+use App\Http\Controllers\DrugController;
+use App\Http\Controllers\DosageController;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -28,6 +30,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Doctor only routes
     Route::middleware('role:doctor')->group(function () {
-        Route::get('/doctor-appointments', [AppointmentController::class, 'doctorAppointments']);
-    });
+    Route::get('/doctor-appointments', [AppointmentController::class, 'doctorAppointments']);
+
+    // Dosage module
+    Route::get('/drug-categories', [DrugController::class, 'categories']);
+    Route::get('/drug-categories/{id}/drugs', [DrugController::class, 'drugsByCategory']);
+    Route::get('/drugs/{id}', [DrugController::class, 'show']);
+    Route::post('/dosage/calculate', [DosageController::class, 'calculate']);
+    Route::get('/dosage/history', [DosageController::class, 'history']);
+});
 });
