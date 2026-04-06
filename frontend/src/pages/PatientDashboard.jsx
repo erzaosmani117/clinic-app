@@ -89,6 +89,10 @@ export default function PatientDashboard() {
                             <p className="text-white text-sm font-medium">{user?.name}</p>
                             <p className="text-blue-300 text-xs">Patient</p>
                         </div>
+                        <button onClick={() => navigate('/profile')}
+                          className="text-white/70 hover:text-white text-sm transition">
+                          My Profile
+                       </button>
                         <button
                             onClick={handleLogout}
                             className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white text-sm px-4 py-2 rounded-lg transition"

@@ -9,6 +9,7 @@ import DosageHome from './pages/DosageHome';
 import DosageDrugList from './pages/DosageDrugList';
 import DosageCalculator from './pages/DosageCalculator';
 import DosageHistory from './pages/DosageHistory';
+import Profile from './pages/Profile';
 
 export default function App() {
   return (
@@ -52,6 +53,13 @@ export default function App() {
           <DosageHistory />
         </ProtectedRoute>
       } />
+
+      <Route path="/profile" element={
+    <ProtectedRoute>
+        <Profile />
+    </ProtectedRoute>
+} />
+
     </Routes>
   );
 }
