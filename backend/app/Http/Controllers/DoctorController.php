@@ -7,15 +7,9 @@ use Illuminate\Http\Request;
 
 class DoctorController extends Controller
 {
-    public function index()
-    {
-        $doctors = User::where('role', 'doctor')
-            ->select('id', 'name', 'email')
-            ->get();
-
-        return response()->json($doctors);
-
-         $specialty = $request->query('specialty');
+    public function index(Request $request)
+{
+    $specialty = $request->query('specialty');
 
     $query = User::where('role', 'doctor')
         ->select('id', 'name', 'email', 'specialty', 'bio');
@@ -25,8 +19,7 @@ class DoctorController extends Controller
     }
 
     return response()->json($query->get());
-
-    }
+}
 
     public function specialties()
 {

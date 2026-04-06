@@ -8,6 +8,7 @@ use App\Http\Controllers\FileAppointmentController;
 use App\Http\Controllers\DrugController;
 use App\Http\Controllers\DosageController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AdminController;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -46,4 +47,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/dosage/calculate', [DosageController::class, 'calculate']);
     Route::get('/dosage/history', [DosageController::class, 'history']);
 });
+
+// Admin only routes
+Route::middleware('role:admin')->group(function () {
+    Route::get('/admin/stats', [AdminController::class, 'stats']);
+    Route::get('/admin/users', [AdminController::class, 'users']);
+    Route::post('/admin/doctors', [AdminController::class, 'addDoctor']);
+    Route::delete('/admin/users/{id}', [AdminController::class, 'deleteUser']);
+    Route::get('/admin/appointments', [AdminController::class, 'appointments']);
+    Route::get('/admin/drug-categories', [AdminController::class, 'drugCategories']);
+    Route::post('/admin/drugs', [AdminController::class, 'addDrug']);
+    Route::delete('/admin/drugs/{id}', [AdminController::class, 'deleteDrug']);
+});
+
 });
