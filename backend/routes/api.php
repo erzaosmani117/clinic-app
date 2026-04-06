@@ -7,13 +7,18 @@ use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\FileAppointmentController;
 use App\Http\Controllers\DrugController;
 use App\Http\Controllers\DosageController;
+use App\Http\Controllers\ProfileController;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login',    [AuthController::class, 'login']);
 
+
 // Authenticated routes
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'show']);
+    Route::patch('/profile', [ProfileController::class, 'update']);
+    
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/file-appointments', [FileAppointmentController::class, 'index']);
     Route::get('/file-appointments/{id}', [FileAppointmentController::class, 'show']);
@@ -22,12 +27,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/file-appointments/{id}', [FileAppointmentController::class, 'destroy']);
 
     // Patient only routes
-    Route::middleware('role:patient')->group(function () {
-        Route::get('/doctors', [DoctorController::class, 'index']);
-        Route::post('/appointments', [AppointmentController::class, 'store']);
-        Route::get('/my-appointments', [AppointmentController::class, 'patientAppointments']);
-    });
-
+   Route::middleware('role:patient')->group(function () {
+    Route::get('/doctors', [DoctorController::class, 'index']);
+    Route::get('/doctors/specialties', [DoctorController::class, 'specialties']);
+    Route::post('/appointments', [AppointmentController::class, 'store']);
+    Route::get('/my-appointments', [AppointmentController::class, 'patientAppointments']);
+    
+});
     // Doctor only routes
     Route::middleware('role:doctor')->group(function () {
     Route::get('/doctor-appointments', [AppointmentController::class, 'doctorAppointments']);

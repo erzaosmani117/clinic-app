@@ -14,5 +14,27 @@ class DoctorController extends Controller
             ->get();
 
         return response()->json($doctors);
+
+         $specialty = $request->query('specialty');
+
+    $query = User::where('role', 'doctor')
+        ->select('id', 'name', 'email', 'specialty', 'bio');
+
+    if ($specialty) {
+        $query->where('specialty', 'like', "%{$specialty}%");
     }
+
+    return response()->json($query->get());
+
+    }
+
+    public function specialties()
+{
+    $specialties = User::where('role', 'doctor')
+        ->whereNotNull('specialty')
+        ->distinct()
+        ->pluck('specialty');
+
+    return response()->json($specialties);
+}
 }
