@@ -48,10 +48,40 @@ export default function DosageHistory() {
         ).sort((a, b) => b[1] - a[1])[0][0]
         : 'N/A';
 
-    return (
-        <div className="min-h-screen bg-gray-50">
-            {/* Navbar */}
-            <nav className="bg-[#0a1628] shadow-lg">
+    const exportCSV = () => {
+    if (history.length === 0) {
+        alert('No data to export.');
+        return;
+    }
+
+    const headers = ['Drug', 'Weight (kg)', 'Age (months)', 'Dose (mg)', 'Capped', 'Date'];
+    
+    const rows = filtered.map(h => [
+        h.drug?.name || 'Unknown',
+        h.patient_weight_kg,
+        h.patient_age_months,
+        h.calculated_dose_mg,
+        h.was_capped ? 'Yes' : 'No',
+        new Date(h.created_at).toLocaleDateString('en-US'),
+    ]);
+
+    const csvContent = [headers, ...rows]
+        .map(row => row.join(','))
+        .join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `dosage-history-${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+};
+
+return (
+    <div className="min-h-screen bg-gray-50">
+    {/* Navbar */}
+    <nav className="bg-[#0a1628] shadow-lg">
                 <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 bg-blue-500 rounded-lg flex items-center justify-center">
@@ -73,17 +103,17 @@ export default function DosageHistory() {
                         </button>
                     </div>
                 </div>
-            </nav>
+    </nav>
 
-            <div className="max-w-6xl mx-auto px-6 py-10">
+    <div className="max-w-6xl mx-auto px-6 py-10">
 
-                <div className="mb-8">
+      <div className="mb-8">
                     <h1 className="text-3xl font-bold text-[#0a1628]">Dosage History</h1>
                     <p className="text-gray-500 mt-1">All your past dosage calculations</p>
-                </div>
+      </div>
 
-                {/* Stats */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        {/* Stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
                     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
                         <p className="text-gray-400 text-sm">Total Calculations</p>
                         <p className="text-3xl font-bold text-[#0a1628] mt-1">{totalCalculations}</p>
@@ -96,10 +126,10 @@ export default function DosageHistory() {
                         <p className="text-gray-400 text-sm">Most Used Drug</p>
                         <p className="text-xl font-bold text-[#0a1628] mt-1 truncate">{mostUsedDrug}</p>
                     </div>
-                </div>
+        </div>
 
-                {/* Error */}
-                {error && (
+        {/* Error */}
+        {error && (
                     <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6 text-sm flex items-center gap-2">
                         <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -107,11 +137,11 @@ export default function DosageHistory() {
                         {error}
                         <button onClick={fetchHistory} className="ml-auto underline">Retry</button>
                     </div>
-                )}
+        )}
 
-                {/* Search and Sort */}
-                {!loading && !error && (
-                    <div className="flex items-center gap-3 mb-6 flex-wrap">
+        {/* Search and Sort */}
+        {!loading && !error && (
+          <div className="flex items-center gap-3 mb-6 flex-wrap">
                         <div className="relative flex-1 min-w-48">
                             <svg className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -127,19 +157,29 @@ export default function DosageHistory() {
                                 <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">✕</button>
                             )}
                         </div>
-                        <select
-                            value={sortOrder}
+                <select
+                    value={sortOrder}
                             onChange={(e) => setSortOrder(e.target.value)}
                             className="px-4 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition bg-white"
-                        >
-                            <option value="desc">Newest first</option>
-                            <option value="asc">Oldest first</option>
-                        </select>
-                    </div>
-                )}
+                >
+                    <option value="desc">Newest first</option>
+                    <option value="asc">Oldest first</option>
+                </select>
 
-                {/* History list */}
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <button
+    onClick={exportCSV}
+    className="flex items-center gap-2 bg-[#0a1628] hover:bg-[#152340] text-white text-sm font-medium px-4 py-2.5 rounded-lg transition"
+>
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+    Export CSV
+</button>
+          </div>
+        )}
+
+        {/* History list */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                     {loading ? (
                         <div className="space-y-3">
                             {[...Array(4)].map((_, i) => (
@@ -205,8 +245,8 @@ export default function DosageHistory() {
                             </p>
                         </div>
                     )}
-                </div>
-            </div>
         </div>
+    </div>
+    </div>
     );
 }

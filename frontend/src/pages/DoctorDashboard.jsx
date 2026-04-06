@@ -11,20 +11,30 @@ export default function DoctorDashboard() {
     const [appointments, setAppointments] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    const [error, setError] = useState('');
+    const [searchName, setSearchName] = useState('');
+    const [sortOrder, setSortOrder] = useState('asc');
+
     useEffect(() => {
         fetchAppointments();
     }, []);
 
     const fetchAppointments = async () => {
-        try {
-            const res = await api.get('/doctor-appointments');
-            setAppointments(res.data);
-        } catch (err) {
-            console.error('Failed to fetch appointments');
-        } finally {
-            setLoading(false);
+    try {
+        const res = await api.get('/doctor-appointments');
+        setAppointments(res.data);
+    } catch (err) {
+        if (err.response?.status === 401) {
+            setError('Session expired. Please log in again.');
+        } else if (err.response?.status === 403) {
+            setError('You do not have permission to view appointments.');
+        } else {
+            setError('Failed to load appointments. Please try again.');
         }
-    };
+    } finally {
+        setLoading(false);
+    }
+};
 
     const handleLogout = async () => {
         try {
@@ -36,9 +46,19 @@ export default function DoctorDashboard() {
         navigate('/login');
     };
 
-    const filteredAppointments = filterDate
-    ? appointments.filter(a => a.date === filterDate)
-    : appointments;
+   const filteredAppointments = appointments
+    .filter(a => {
+        const matchesDate = filterDate ? a.date === filterDate : true;
+        const matchesName = searchName
+            ? a.patient?.name?.toLowerCase().includes(searchName.toLowerCase())
+            : true;
+        return matchesDate && matchesName;
+    })
+    .sort((a, b) => {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+    });
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -77,8 +97,23 @@ export default function DoctorDashboard() {
 
             <div className="max-w-6xl mx-auto px-6 py-10">
 
-                {/* Welcome */}
-                <div className="mb-10">
+    {error && (
+        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6 text-sm flex items-center gap-2">
+            <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {error}
+            <button
+                onClick={() => { setError(''); fetchAppointments(); }}
+                className="ml-auto underline hover:text-red-800"
+            >
+                Retry
+            </button>
+        </div>
+    )}
+
+    {/* Welcome */}
+    <div className="mb-10">
                     <h1 className="text-3xl font-bold text-[#0a1628]">
                         Welcome, Dr. {user?.name?.split(' ')[0]} 👨‍⚕️
                     </h1>
@@ -109,18 +144,51 @@ export default function DoctorDashboard() {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3 mb-6">
+                {/* Search, Filter, Sort */}
+<div className="flex items-center gap-3 mb-6 flex-wrap">
+    <div className="relative flex-1 min-w-48">
+        <svg className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input
+            type="text"
+            placeholder="Search by patient name..."
+            value={searchName}
+            onChange={(e) => setSearchName(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+        />
+        {searchName && (
+            <button
+                onClick={() => setSearchName('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+                ✕
+            </button>
+        )}
+    </div>
+
     <input
         type="date"
         value={filterDate}
         onChange={(e) => setFilterDate(e.target.value)}
-        className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+        className="px-4 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
     />
-    {filterDate && (
+
+    <select
+        value={sortOrder}
+        onChange={(e) => setSortOrder(e.target.value)}
+        className="px-4 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition bg-white"
+    >
+        <option value="asc">Date: Oldest first</option>
+        <option value="desc">Date: Newest first</option>
+    </select>
+
+    {(filterDate || searchName) && (
         <button
-            onClick={() => setFilterDate('')}
-            className="text-sm text-gray-400 hover:text-gray-600 transition">
-            Clear filter
+            onClick={() => { setFilterDate(''); setSearchName(''); }}
+            className="text-sm text-gray-400 hover:text-gray-600 transition"
+        >
+            Clear all
         </button>
     )}
 </div>
@@ -194,17 +262,47 @@ export default function DoctorDashboard() {
                                                     day: 'numeric'
                                                 })}
                                             </td>
-                                            <td className="py-4">
-                                                <span className="text-xs font-medium bg-green-100 text-green-700 px-3 py-1 rounded-full">
-                                                    {apt.status}
-                                                </span>
-                                            </td>
+                <td className="py-4">
+    <div className="flex items-center gap-2">
+        <span className={`text-xs font-medium px-3 py-1 rounded-full ${
+            apt.status === 'confirmed'
+                ? 'bg-green-100 text-green-700'
+                : apt.status === 'pending'
+                ? 'bg-yellow-100 text-yellow-700'
+                : 'bg-red-100 text-red-600'
+        }`}>
+            {apt.status}
+        </span>
+        {apt.status === 'pending' && (
+            <div className="flex gap-1">
+                <button
+                    onClick={() => updateStatus(apt.id, 'confirmed')}
+                    className="text-xs bg-green-500 hover:bg-green-600 text-white px-2.5 py-1 rounded-lg transition"
+                >
+                    Confirm
+                </button>
+                <button
+                    onClick={() => updateStatus(apt.id, 'cancelled')}
+                    className="text-xs bg-red-400 hover:bg-red-500 text-white px-2.5 py-1 rounded-lg transition"
+                >
+                    Cancel
+                </button>
+            </div>
+        )}
+    </div>
+</td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                         </div>
+                        
                     )}
+                    {filteredAppointments.length > 0 && (
+    <p className="text-gray-400 text-xs text-right pt-4">
+        Showing {filteredAppointments.length} of {appointments.length} appointments
+    </p>
+)}
                 </div>
             </div>
         </div>

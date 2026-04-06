@@ -219,9 +219,15 @@ export default function PatientDashboard() {
                                                     </p>
                                                 </div>
                                             </div>
-                                            <span className="text-xs font-medium bg-green-100 text-green-700 px-3 py-1 rounded-full">
-                                                {apt.status}
-                                            </span>
+                                           <span className={`text-xs font-medium px-3 py-1 rounded-full ${
+                                               apt.status === 'confirmed'
+                                                   ? 'bg-green-100 text-green-700'
+                                                   : apt.status === 'pending'
+                                                   ? 'bg-yellow-100 text-yellow-700'
+                                                   : 'bg-red-100 text-red-600'
+                                                          }`}>
+                                             {apt.status}
+                                        </span>
                                         </div>
                                     ))}
                                 </div>
