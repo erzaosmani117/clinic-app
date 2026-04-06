@@ -16,7 +16,7 @@ return new class extends Migration
         $table->foreignId('patient_id')->constrained('users')->onDelete('cascade');
         $table->foreignId('doctor_id')->constrained('users')->onDelete('cascade');
         $table->date('date');
-        $table->enum('status', ['confirmed', 'cancelled'])->default('confirmed');
+        $table->enum('status', ['pending', 'confirmed', 'cancelled'])->default('pending');
         $table->timestamps();
     });
 }

@@ -31,6 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Doctor only routes
     Route::middleware('role:doctor')->group(function () {
     Route::get('/doctor-appointments', [AppointmentController::class, 'doctorAppointments']);
+    Route::patch('/appointments/{id}/status', [AppointmentController::class, 'updateStatus']);
 
     // Dosage module
     Route::get('/drug-categories', [DrugController::class, 'categories']);
