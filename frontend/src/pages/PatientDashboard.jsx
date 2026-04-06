@@ -13,20 +13,34 @@ export default function PatientDashboard() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
+    const [specialties, setSpecialties] = useState([]);
+    const [selectedSpecialty, setSelectedSpecialty] = useState('');
 
-    useEffect(() => {
-        fetchDoctors();
-        fetchAppointments();
-    }, []);
+   
+   useEffect(() => {
+    fetchDoctors();
+    fetchAppointments();
+    fetchSpecialties();
+}, []);
 
-    const fetchDoctors = async () => {
-        try {
-            const res = await api.get('/doctors');
-            setDoctors(res.data);
-        } catch (err) {
-            console.error('Failed to fetch doctors');
-        }
-    };
+const fetchSpecialties = async () => {
+    try {
+        const res = await api.get('/doctors/specialties');
+        setSpecialties(res.data);
+    } catch (err) {
+        console.error('Failed to fetch specialties');
+    }
+}
+
+    const fetchDoctors = async (specialty = '') => {
+    try {
+        const url = specialty ? `/doctors?specialty=${specialty}` : '/doctors';
+        const res = await api.get(url);
+        setDoctors(res.data);
+    } catch (err) {
+        console.error('Failed to fetch doctors');
+    }
+};
 
     const fetchAppointments = async () => {
         try {
@@ -135,50 +149,56 @@ export default function PatientDashboard() {
                                 </div>
                             )}
 
-                            <form onSubmit={handleSubmit} className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Select Doctor
-                                    </label>
-                                    <select
-                                        value={form.doctor_id}
-                                        onChange={(e) => setForm({ ...form, doctor_id: e.target.value })}
-                                        required
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition bg-white"
-                                    >
-                                        <option value="">-- Choose a doctor --</option>
-                                        {doctors.map((doc) => (
-                                            <option key={doc.id} value={doc.id}>
-                                                Dr. {doc.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
+    <form onSubmit={handleSubmit} className="space-y-4">
+    <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">
+        Filter by Specialty
+    </label>
+    <select
+        value={selectedSpecialty}
+        onChange={(e) => {
+            setSelectedSpecialty(e.target.value);
+            setForm({ ...form, doctor_id: '' });
+            fetchDoctors(e.target.value);
+        }}
+        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition bg-white">
+        <option value="">-- All specialties --</option>
+        {specialties.map((s, i) => (
+            <option key={i} value={s}>{s}</option>
+        ))}
+    </select>
+</div>
+    <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+            Select Doctor
+        </label>
+        <select
+        value={form.doctor_id} onChange={(e) => setForm({ ...form, doctor_id: e.target.value })}
+        required className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition bg-white">
+            <option value="">-- Choose a doctor --</option>
+                {doctors.map((doc) => (
+                    <option key={doc.id} value={doc.id}>
+                               Dr. {doc.name} {doc.specialty ? `— ${doc.specialty}` : ''}
+                    </option>
+                        ))}
+         </select>
+    </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Select Date
-                                    </label>
-                                    <input
-                                        type="date"
-                                        min={today}
-                                        value={form.date}
-                                        onChange={(e) => setForm({ ...form, date: e.target.value })}
-                                        required
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-                                    />
-                                </div>
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+            Select Date
+    </label>
+        <input type="date" min={today} value={form.date}
+           onChange={(e) => setForm({ ...form, date: e.target.value })}
+            required className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"/>
+     </div>
 
-                                <button
-                                    type="submit"
-                                    disabled={loading}
-                                    className="w-full bg-[#0a1628] hover:bg-[#152340] text-white font-semibold py-2.5 rounded-lg transition disabled:opacity-50"
-                                >
-                                    {loading ? 'Booking...' : 'Book Appointment'}
-                                </button>
-                            </form>
-                        </div>
-                    </div>
+       <button type="submit" disabled={loading}
+         className="w-full bg-[#0a1628] hover:bg-[#152340] text-white font-semibold py-2.5 rounded-lg transition disabled:opacity-50">
+        {loading ? 'Booking...' : 'Book Appointment'}</button>
+    </form>
+</div>
+                   </div>
 
                     {/* Appointments List */}
                     <div className="lg:col-span-2">

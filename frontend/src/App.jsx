@@ -10,6 +10,7 @@ import DosageDrugList from './pages/DosageDrugList';
 import DosageCalculator from './pages/DosageCalculator';
 import DosageHistory from './pages/DosageHistory';
 import Profile from './pages/Profile';
+import AdminDashboard from './pages/AdminDashboard';
 
 export default function App() {
   return (
@@ -57,6 +58,11 @@ export default function App() {
       <Route path="/profile" element={
     <ProtectedRoute>
         <Profile />
+    </ProtectedRoute>
+} />
+<Route path="/admin" element={
+    <ProtectedRoute role="admin">
+        <AdminDashboard />
     </ProtectedRoute>
 } />
 

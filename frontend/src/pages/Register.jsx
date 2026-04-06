@@ -28,11 +28,13 @@ export default function Register() {
         try {
             const response = await api.post('/register', form);
             login(response.data.user, response.data.token);
-            if (response.data.user.role === 'doctor') {
-                navigate('/doctor');
-            } else {
-                navigate('/patient');
-            }
+           if (response.data.user.role === 'admin') {
+    navigate('/admin');
+} else if (response.data.user.role === 'doctor') {
+    navigate('/doctor');
+} else {
+    navigate('/patient');
+}
         } catch (err) {
             setError(err.response?.data?.message || 'Registration failed.');
         } finally {
