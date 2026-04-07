@@ -85,8 +85,12 @@ FileRepository — punon me CSV file, me metodat GetAll, GetById, Add, Save, Del
 AppointmentService merr Repository si parameter (dependency injection) dhe përmban logjikën: List me filtrim sipas statusit, Add me validim, FindById.
 
 Çka Mbeti
+Nga kjo feature nuk mbeti asgjë cdo gjë u përfundua me sukses
+
+Për sprints të ri:
 Admin Panel — Hapur për Sprint-in e Ardhshëm
 Hapa strukturën fillestare të Admin Panel si përgatitje për sprint-in e ardhshëm. Aktualisht ekziston vetëm struktura e file-ve dhe disa endpoint teste, por logjika e plotë nuk është implementuar. Në sprint-in e ardhshëm planifikohet implementimi i plotë i rolit Admin me mundësi menaxhimi të doktorëve, pacientëve dhe ilaçeve.
+
 Unit Tests
 Pasi qe Laravel ka PHPUnit të integruar nuk pata nevojë të instalojë asgjë.
 Thjesht krijova nje file: DosageCalculatorTest --unit dhe në të bëra 6 testime.
