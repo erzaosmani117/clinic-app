@@ -59,7 +59,14 @@ export default function DoctorDashboard() {
         const dateB = new Date(b.date);
         return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
     });
-
+const updateStatus = async (id, status) => {
+    try {
+        await api.patch(`/appointments/${id}/status`, { status });
+        fetchAppointments();
+    } catch (err) {
+        console.error('Failed to update appointment status');
+    }
+};
     return (
         <div className="min-h-screen bg-gray-50">
 
@@ -243,30 +250,30 @@ export default function DoctorDashboard() {
                                         <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider pb-3">Status</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-50">
-                                    {filteredAppointments.map((apt, index)  => (
-                                        <tr key={apt.id} className="hover:bg-gray-50/50 transition">
-                                            <td className="py-4 pr-4 text-sm text-gray-400">{index + 1}</td>
-                                            <td className="py-4 pr-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 bg-[#0a1628] rounded-lg flex items-center justify-center shrink-0">
-                                                        <span className="text-white text-xs font-bold">
-                                                            {apt.patient?.name?.charAt(0).toUpperCase()}
-                                                        </span>
-                                                    </div>
-                                                    <p className="font-medium text-[#0a1628] text-sm">{apt.patient?.name}</p>
-                                                </div>
-                                            </td>
-                                            <td className="py-4 pr-4 text-sm text-gray-500">{apt.patient?.email}</td>
-                                            <td className="py-4 pr-4 text-sm text-gray-600">
-                                                {new Date(apt.date).toLocaleDateString('en-US', {
-                                                    weekday: 'short',
-                                                    year: 'numeric',
-                                                    month: 'short',
-                                                    day: 'numeric'
-                                                })}
-                                            </td>
-                <td className="py-4">
+    <tbody className="divide-y divide-gray-50">
+        {filteredAppointments.map((apt, index)  => (
+          <tr key={apt.id} className="hover:bg-gray-50/50 transition">
+              <td className="py-4 pr-4 text-sm text-gray-400">{index + 1}</td>
+                 <td className="py-4 pr-4">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-[#0a1628] rounded-lg flex items-center justify-center shrink-0">
+                            <span className="text-white text-xs font-bold">
+                              {apt.patient?.name?.charAt(0).toUpperCase()}
+                            </span>
+                        </div>
+                        <p className="font-medium text-[#0a1628] text-sm">{apt.patient?.name}</p>
+                      </div>
+                    </td>
+                <td className="py-4 pr-4 text-sm text-gray-500">{apt.patient?.email}</td>
+                <td className="py-4 pr-4 text-sm text-gray-600">
+                    {new Date(apt.date).toLocaleDateString('en-US', {
+                        weekday: 'short',
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    })}
+            </td>
+    <td className="py-4">
     <div className="flex items-center gap-2">
         <span className={`text-xs font-medium px-3 py-1 rounded-full ${
             apt.status === 'confirmed'
@@ -275,34 +282,31 @@ export default function DoctorDashboard() {
                 ? 'bg-yellow-100 text-yellow-700'
                 : 'bg-red-100 text-red-600'
         }`}>
-            {apt.status}
+        {apt.status}
         </span>
         {apt.status === 'pending' && (
             <div className="flex gap-1">
                 <button
                     onClick={() => updateStatus(apt.id, 'confirmed')}
-                    className="text-xs bg-green-500 hover:bg-green-600 text-white px-2.5 py-1 rounded-lg transition"
-                >
+                    className="text-xs bg-green-500 hover:bg-green-600 text-white px-2.5 py-1 rounded-lg transition">
                     Confirm
                 </button>
                 <button
                     onClick={() => updateStatus(apt.id, 'cancelled')}
-                    className="text-xs bg-red-400 hover:bg-red-500 text-white px-2.5 py-1 rounded-lg transition"
-                >
+                    className="text-xs bg-red-400 hover:bg-red-500 text-white px-2.5 py-1 rounded-lg transition">
                     Cancel
                 </button>
             </div>
         )}
     </div>
 </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                    )}
-                    {filteredAppointments.length > 0 && (
+    </tr>
+))}
+</tbody>
+</table>
+</div>
+)}
+{filteredAppointments.length > 0 && (
     <p className="text-gray-400 text-xs text-right pt-4">
         Showing {filteredAppointments.length} of {appointments.length} appointments
     </p>
