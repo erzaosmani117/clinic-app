@@ -1,37 +1,17 @@
 import { Link } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 
 export default function Home() {
     return (
         <div className="min-h-screen bg-[#0a1628] flex flex-col">
 
-            {/* Navbar */}
-            <nav className="px-6 py-5 flex items-center justify-between max-w-6xl mx-auto w-full">
-                <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 bg-blue-500 rounded-lg flex items-center justify-center">
-                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <p className="text-white font-bold text-lg leading-none">PediCare</p>
-                        <p className="text-blue-300 text-xs">Pediatric Clinic</p>
-                    </div>
-                </div>
-                <div className="flex items-center gap-3">
-                    <Link
-                        to="/login"
-                        className="text-white/80 hover:text-white text-sm font-medium transition"
-                    >
-                        Sign In
-                    </Link>
-                    <Link
-                        to="/register"
-                        className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
-                    >
-                        Get Started
-                    </Link>
-                </div>
-            </nav>
+            <Navbar
+                variant="home"
+                links={[
+                    { label: 'Sign In', to: '/login' },
+                    { label: 'Get Started', to: '/register', className: 'bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition' },
+                ]}
+            />
 
             {/* Hero */}
             <div className="flex-1 flex flex-col items-center justify-center text-center px-6 py-20">
