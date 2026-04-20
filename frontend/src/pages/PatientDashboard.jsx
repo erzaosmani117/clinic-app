@@ -14,6 +14,7 @@ export default function PatientDashboard() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
+    const [refreshingAppointments, setRefreshingAppointments] = useState(false);
     const [specialties, setSpecialties] = useState([]);
     const [selectedSpecialty, setSelectedSpecialty] = useState('');
 
@@ -48,7 +49,19 @@ const fetchSpecialties = async () => {
             const res = await api.get('/my-appointments');
             setAppointments(res.data);
         } catch (err) {
+            // This used to fail silently (console only), which makes the UI look "stuck".
+            setError('Failed to load appointments. Please refresh and try again.');
             console.error('Failed to fetch appointments');
+        }
+    };
+
+    const handleRefreshAppointments = async () => {
+        setError('');
+        setRefreshingAppointments(true);
+        try {
+            await fetchAppointments();
+        } finally {
+            setRefreshingAppointments(false);
         }
     };
 
@@ -59,10 +72,24 @@ const fetchSpecialties = async () => {
         setLoading(true);
 
         try {
-            await api.post('/appointments', form);
+            const res = await api.post('/appointments', form);
             setSuccess('Appointment booked successfully!');
             setForm({ doctor_id: '', date: '' });
-            fetchAppointments();
+            // Optimistic UI update so the patient sees it immediately.
+            const selectedDoctor = doctors.find(d => String(d.id) === String(form.doctor_id));
+            const created = {
+                ...res.data,
+                doctor: selectedDoctor ? { id: selectedDoctor.id, name: selectedDoctor.name, email: selectedDoctor.email } : res.data.doctor,
+            };
+            setAppointments((prev) => {
+                const next = [created, ...prev].filter(Boolean);
+                // Sort by date ascending to match backend ordering
+                next.sort((a, b) => new Date(a.date) - new Date(b.date));
+                return next;
+            });
+
+            // Then sync from server to ensure the final shape/status is correct.
+            await fetchAppointments();
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to book appointment.');
         } finally {
@@ -177,8 +204,21 @@ const fetchSpecialties = async () => {
                     {/* Appointments List */}
                     <div className="lg:col-span-2">
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                            <h2 className="text-lg font-bold text-[#0a1628] mb-1">My Appointments</h2>
-                            <p className="text-gray-400 text-sm mb-6">Your upcoming visits</p>
+                            <div className="flex items-start justify-between gap-4 mb-6">
+                                <div>
+                                    <h2 className="text-lg font-bold text-[#0a1628] mb-1">My Appointments</h2>
+                                    <p className="text-gray-400 text-sm">Your upcoming visits</p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={handleRefreshAppointments}
+                                    disabled={refreshingAppointments}
+                                    className="text-sm text-gray-500 hover:text-blue-600 border border-gray-200 hover:border-blue-200 px-3 py-1.5 rounded-lg transition disabled:opacity-50"
+                                    title="Refresh appointments"
+                                >
+                                    {refreshingAppointments ? 'Refreshing...' : 'Refresh'}
+                                </button>
+                            </div>
 
                             {appointments.length === 0 ? (
                                 <div className="text-center py-16">
