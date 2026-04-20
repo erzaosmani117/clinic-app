@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Appointment;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class AppointmentController extends Controller
 {
@@ -11,7 +12,10 @@ class AppointmentController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'doctor_id' => 'required|exists:users,id',
+            'doctor_id' => [
+                'required',
+                Rule::exists('users', 'id')->where(fn ($q) => $q->where('role', 'doctor')),
+            ],
             'date'      => 'required|date|after:today',
         ]);
 
