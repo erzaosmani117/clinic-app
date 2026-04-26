@@ -3,7 +3,7 @@ import Navbar from '../components/Navbar';
 
 export default function Home() {
     return (
-        <div className="min-h-screen bg-[#0a1628] flex flex-col">
+        <div className="app-shell flex flex-col bg-gradient-to-br from-slate-950 via-slate-900 to-blue-900">
 
             <Navbar
                 variant="home"
@@ -15,20 +15,19 @@ export default function Home() {
 
             {/* Hero */}
             <div className="flex-1 flex flex-col items-center justify-center text-center px-6 py-20">
-                <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 text-blue-300 text-xs font-medium px-4 py-2 rounded-full mb-8">
+                <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-400/20 text-blue-200 text-xs font-medium px-4 py-2 rounded-full mb-8">
                     <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
-                    Trusted Pediatric Care
+                    Trusted Digital Clinic Platform
                 </div>
 
                 <h1 className="text-5xl sm:text-6xl font-bold text-white max-w-3xl leading-tight mb-6">
-                    Quality Care for
-                    <span className="text-blue-400"> Your Children</span>
+                    Modern Care Operations
+                    <span className="text-blue-300"> for Pediatric Clinics</span>
                 </h1>
 
                 <p className="text-white/60 text-lg max-w-xl mb-10 leading-relaxed">
-                    PediCare connects families with trusted pediatric doctors.
-                    Book appointments online and let our doctors provide
-                    the best care for your child.
+                    PediCare helps teams manage appointments, physician workflows,
+                    and patient communication in one secure workspace.
                 </p>
 
                 <div className="flex items-center gap-4 flex-wrap justify-center">
@@ -36,7 +35,7 @@ export default function Home() {
                         to="/register"
                         className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-8 py-3 rounded-xl transition"
                     >
-                        Book an Appointment
+                        Request Access
                     </Link>
                     <Link
                         to="/login"
@@ -85,8 +84,8 @@ export default function Home() {
             </div>
 
             {/* Footer */}
-            <div className="text-center py-6 text-white/30 text-xs">
-                © 2026 PediCare Pediatric Clinic. All rights reserved.
+            <div className="text-center py-6 text-slate-300/70 text-xs">
+                2026 PediCare. All rights reserved.
             </div>
         </div>
     );

@@ -26,12 +26,12 @@ const categoryIcons = {
 };
 
 const categoryColors = {
-    antibiotics: 'bg-blue-50 text-blue-600 border-blue-100',
-    respiratory: 'bg-red-50 text-red-500 border-red-100',
-    fever: 'bg-orange-50 text-orange-500 border-orange-100',
-    gastro: 'bg-green-50 text-green-600 border-green-100',
-    ear_eye: 'bg-purple-50 text-purple-600 border-purple-100',
-    vitamins: 'bg-yellow-50 text-yellow-600 border-yellow-100',
+    antibiotics: 'from-blue-500 to-indigo-500',
+    respiratory: 'from-rose-500 to-red-500',
+    fever: 'from-amber-500 to-orange-500',
+    gastro: 'from-emerald-500 to-green-500',
+    ear_eye: 'from-violet-500 to-purple-500',
+    vitamins: 'from-cyan-500 to-blue-500',
 };
 
 export default function DosageHome() {
@@ -69,7 +69,7 @@ export default function DosageHome() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="app-shell">
             <Navbar
                 userName={user?.name}
                 roleLabel="Doctor"
@@ -82,9 +82,10 @@ export default function DosageHome() {
             />
 
             <div className="max-w-6xl mx-auto px-6 py-10">
-                <div className="mb-10">
-                    <h1 className="text-3xl font-bold text-[#0a1628]">Drug Dosage Calculator</h1>
-                    <p className="text-gray-500 mt-1">Select a category to view available drugs</p>
+                <div className="rounded-3xl border border-blue-100 bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 p-8 text-white shadow-xl mb-8">
+                    <p className="text-blue-200 text-xs font-semibold uppercase tracking-wide">Clinical Decision Support</p>
+                    <h1 className="text-3xl font-bold mt-2">Drug Dosage Calculator</h1>
+                    <p className="text-blue-100 mt-2 text-sm">Select a treatment category to view medications and calculate pediatric dosage safely.</p>
                 </div>
 
                 {/* Error */}
@@ -100,29 +101,33 @@ export default function DosageHome() {
 
                 {/* Loading */}
                 {loading ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                         {[...Array(6)].map((_, i) => (
-                            <div key={i} className="bg-white rounded-2xl border border-gray-100 p-6 animate-pulse">
-                                <div className="w-12 h-12 bg-gray-100 rounded-xl mb-4"></div>
-                                <div className="h-4 bg-gray-100 rounded w-2/3"></div>
+                            <div key={i} className="bg-white rounded-3xl border border-gray-200 p-6 animate-pulse shadow-sm">
+                                <div className="w-14 h-14 bg-gray-100 rounded-2xl mb-4"></div>
+                                <div className="h-4 bg-gray-100 rounded w-2/3 mb-2"></div>
+                                <div className="h-3 bg-gray-100 rounded w-1/2"></div>
                             </div>
                         ))}
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                         {categories.map((cat) => (
                             <button
                                 key={cat.id}
                                 onClick={() => navigate(`/dosage/category/${cat.id}`)}
-                                className="bg-white rounded-2xl border border-gray-100 p-6 text-left hover:shadow-md hover:border-blue-100 transition group"
+                                className="rounded-3xl border border-slate-200 text-left hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 group overflow-hidden bg-white"
                             >
-                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 border ${categoryColors[cat.icon] || 'bg-blue-50 text-blue-600 border-blue-100'}`}>
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        {categoryIcons[cat.icon] || categoryIcons.antibiotics}
-                                    </svg>
+                                <div className={`h-2 bg-gradient-to-r ${categoryColors[cat.icon] || 'from-blue-500 to-indigo-500'}`}></div>
+                                <div className="p-6">
+                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 text-white shadow-md bg-gradient-to-br ${categoryColors[cat.icon] || 'from-blue-500 to-indigo-500'}`}>
+                                        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            {categoryIcons[cat.icon] || categoryIcons.antibiotics}
+                                        </svg>
+                                    </div>
+                                    <p className="font-semibold text-slate-900 group-hover:text-blue-700 transition">{cat.name}</p>
+                                    <p className="text-slate-500 text-xs mt-1">Tap to view medications and details</p>
                                 </div>
-                                <p className="font-semibold text-[#0a1628] group-hover:text-blue-600 transition">{cat.name}</p>
-                                <p className="text-gray-400 text-xs mt-1">View drugs →</p>
                             </button>
                         ))}
                     </div>

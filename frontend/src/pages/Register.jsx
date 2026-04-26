@@ -56,17 +56,17 @@ export default function Register() {
     };
 
     return (
-        <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
+        <div className="min-h-screen bg-linear-to-br from-slate-100 via-blue-50 to-blue-100 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-xl w-full max-w-md p-8">
 
                 <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-full mb-4">
-                        <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+                        <svg className="w-8 h-8 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                     </div>
-                    <h1 className="text-2xl font-bold text-gray-900">Create Account</h1>
-                    <p className="text-gray-500 mt-1">Join the Pediatric Clinic</p>
+                    <h1 className="text-2xl font-bold text-gray-900">Create account</h1>
+                    <p className="text-gray-500 mt-1">Create your clinic account</p>
                 </div>
 
                 {error && (
@@ -84,7 +84,7 @@ export default function Register() {
                             value={form.name}
                             onChange={handleChange}
                             required
-                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                             placeholder="Enter your full name"
                         />
                     </div>
@@ -97,7 +97,7 @@ export default function Register() {
                             value={form.email}
                             onChange={handleChange}
                             required
-                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                             placeholder="Enter your email"
                         />
                     </div>
@@ -110,7 +110,7 @@ export default function Register() {
                             value={form.password}
                             onChange={handleChange}
                             required
-                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                             placeholder="Min. 6 characters"
                         />
                     </div>
@@ -123,7 +123,7 @@ export default function Register() {
                             value={form.password_confirmation}
                             onChange={handleChange}
                             required
-                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                             placeholder="Re-enter your password"
                         />
                     </div>
@@ -136,7 +136,7 @@ export default function Register() {
                                 onClick={() => setForm({ ...form, role: 'patient' })}
                                 className={`py-2.5 px-4 rounded-lg border-2 text-sm font-medium transition ${
                                     form.role === 'patient'
-                                        ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                                        ? 'border-blue-500 bg-blue-50 text-blue-700'
                                         : 'border-gray-200 text-gray-500 hover:border-gray-300'
                                 }`}
                             >
@@ -147,7 +147,7 @@ export default function Register() {
                                 onClick={() => setForm({ ...form, role: 'doctor' })}
                                 className={`py-2.5 px-4 rounded-lg border-2 text-sm font-medium transition ${
                                     form.role === 'doctor'
-                                        ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                                        ? 'border-blue-500 bg-blue-50 text-blue-700'
                                         : 'border-gray-200 text-gray-500 hover:border-gray-300'
                                 }`}
                             >
@@ -159,7 +159,7 @@ export default function Register() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                         {loading ? 'Creating account...' : 'Create Account'}
                     </button>
@@ -167,7 +167,7 @@ export default function Register() {
 
                 <p className="text-center text-sm text-gray-500 mt-6">
                     Already have an account?{' '}
-                    <Link to="/login" className="text-indigo-600 font-medium hover:underline">
+                    <Link to="/login" className="text-blue-700 font-medium hover:underline">
                         Sign in
                     </Link>
                 </p>

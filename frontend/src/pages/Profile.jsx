@@ -121,7 +121,7 @@ export default function Profile() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="app-shell">
             <Navbar
                 userName={user?.name}
                 roleLabel={user?.role === 'doctor' ? 'Doctor' : 'Patient'}
@@ -161,7 +161,7 @@ export default function Profile() {
                     {/* Success */}
                     {success && (
                         <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-6 text-sm">
-                            ✓ {success}
+                            {success}
                         </div>
                     )}
 

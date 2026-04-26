@@ -106,14 +106,14 @@ export default function DosageCalculator() {
     };
 
     const severityLabel = {
-        high: '🔴 High Risk',
-        moderate: '🟡 Moderate Risk',
-        low: '🟢 Low Risk',
+        high: 'High Risk',
+        moderate: 'Moderate Risk',
+        low: 'Low Risk',
     };
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="app-shell flex items-center justify-center">
                 <p className="text-gray-400">Loading drug information...</p>
             </div>
         );
@@ -121,7 +121,7 @@ export default function DosageCalculator() {
 
     if (fetchError) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="app-shell flex items-center justify-center">
                 <div className="text-center">
                     <p className="text-red-500 font-medium mb-3">{fetchError}</p>
                     <button
@@ -136,7 +136,7 @@ export default function DosageCalculator() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="app-shell">
             <Navbar
                 links={[
                     { label: '← Back', onClick: () => navigate(`/dosage/category/${drug?.category_id}`) },
@@ -144,29 +144,29 @@ export default function DosageCalculator() {
                 ]}
             />
 
-            <div className="max-w-2xl mx-auto px-6 py-10">
+            <div className="max-w-4xl mx-auto px-6 py-10">
 
                 {/* Drug info card */}
-                <div className="bg-[#0a1628] rounded-2xl p-6 mb-6 text-white">
-                    <p className="text-blue-300 text-xs mb-1">{drug?.category?.name}</p>
-                    <h1 className="text-2xl font-bold mb-3">{drug?.name}</h1>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-white/10 rounded-xl p-3">
-                            <p className="text-blue-200 text-xs">Dose per kg</p>
-                            <p className="text-white font-semibold mt-0.5">
+                <div className="bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 rounded-3xl p-7 mb-6 text-white shadow-xl">
+                    <p className="text-blue-200 text-xs mb-1 font-semibold uppercase tracking-wide">{drug?.category?.name}</p>
+                    <h1 className="text-3xl font-bold mb-4">{drug?.name}</h1>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="bg-white/10 rounded-2xl p-4 border border-white/20">
+                            <p className="text-blue-100 text-xs">Dose per kg</p>
+                            <p className="text-white font-semibold mt-1 text-lg">
                                 {drug?.dose_per_kg > 0 ? `${drug.dose_per_kg} mg/kg` : 'Fixed dose'}
                             </p>
                         </div>
-                        <div className="bg-white/10 rounded-xl p-3">
-                            <p className="text-blue-200 text-xs">Max single dose</p>
-                            <p className="text-white font-semibold mt-0.5">{drug?.max_single_dose} mg</p>
+                        <div className="bg-white/10 rounded-2xl p-4 border border-white/20">
+                            <p className="text-blue-100 text-xs">Max single dose</p>
+                            <p className="text-white font-semibold mt-1 text-lg">{drug?.max_single_dose} mg</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Contraindication warning */}
                 {drug?.contraindications && (
-                    <div className={`border rounded-xl p-4 mb-6 ${severityColor[drug.contraindication_severity]}`}>
+                    <div className={`border rounded-2xl p-4 mb-6 ${severityColor[drug.contraindication_severity]}`}>
                         <p className="font-semibold text-sm mb-1">
                             {severityLabel[drug.contraindication_severity]} — Contraindication
                         </p>
@@ -175,9 +175,9 @@ export default function DosageCalculator() {
                 )}
 
                 {/* Calculator form */}
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                <div className="bg-white rounded-3xl border border-slate-200 shadow-lg p-6">
                     <h2 className="text-lg font-bold text-[#0a1628] mb-1">Calculate Dosage</h2>
-                    <p className="text-gray-400 text-sm mb-6">Enter patient details to calculate the safe dose</p>
+                    <p className="text-slate-500 text-sm mb-6">Enter patient details to generate a safe recommended dose.</p>
 
                     {errors.general && (
                         <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4 text-sm">
@@ -199,7 +199,7 @@ export default function DosageCalculator() {
                                 step="0.1"
                                 min="0.5"
                                 max="150"
-                                className={`w-full px-4 py-2.5 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
+                                className={`w-full px-4 py-3 border rounded-xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition bg-slate-50 ${
                                     errors.weight_kg ? 'border-red-300 bg-red-50' : 'border-gray-200'
                                 }`}
                             />
@@ -225,7 +225,7 @@ export default function DosageCalculator() {
                                 placeholder="e.g. 36 (3 years = 36 months)"
                                 min="0"
                                 max="216"
-                                className={`w-full px-4 py-2.5 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
+                                className={`w-full px-4 py-3 border rounded-xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition bg-slate-50 ${
                                     errors.age_months ? 'border-red-300 bg-red-50' : 'border-gray-200'
                                 }`}
                             />
@@ -243,7 +243,7 @@ export default function DosageCalculator() {
                         <button
                             type="submit"
                             disabled={calculating}
-                            className="w-full bg-[#0a1628] hover:bg-[#152340] text-white font-semibold py-2.5 rounded-lg transition disabled:opacity-50"
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition disabled:opacity-50 shadow-md shadow-blue-200"
                         >
                             {calculating ? 'Calculating...' : 'Calculate Dose'}
                         </button>
@@ -252,24 +252,24 @@ export default function DosageCalculator() {
 
                 {/* Result */}
                 {result && (
-                    <div className="mt-6 bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                    <div className="mt-6 bg-white rounded-3xl border border-slate-200 shadow-lg p-6">
                         <h3 className="text-lg font-bold text-[#0a1628] mb-4">Calculation Result</h3>
 
-                        <div className="bg-blue-50 border border-blue-100 rounded-xl p-5 mb-4">
+                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-5 mb-4">
                             <p className="text-blue-600 text-sm font-medium">Recommended Dose</p>
-                            <p className="text-4xl font-bold text-[#0a1628] mt-1">
+                            <p className="text-5xl font-bold text-[#0a1628] mt-1">
                                 {result.calculated_dose_mg} <span className="text-lg font-normal text-gray-500">mg</span>
                             </p>
                             {result.was_capped && (
-                                <p className="text-orange-500 text-xs mt-2 flex items-center gap-1">
-                                    ⚠️ Dose was capped at the maximum single dose limit
+                                <p className="text-orange-500 text-xs mt-2">
+                                    Dose was capped at the maximum single-dose limit.
                                 </p>
                             )}
                         </div>
 
                         {result.age_warning && (
                             <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
-                                <p className="text-red-600 text-sm font-semibold">⚠️ Age Warning</p>
+                                <p className="text-red-600 text-sm font-semibold">Age warning</p>
                                 <p className="text-red-600 text-sm mt-1">{result.age_warning}</p>
                             </div>
                         )}
@@ -287,7 +287,7 @@ export default function DosageCalculator() {
                             onClick={() => navigate('/dosage/history')}
                             className="w-full mt-4 border border-gray-200 hover:border-blue-200 text-gray-600 hover:text-blue-600 font-medium py-2.5 rounded-lg transition text-sm"
                         >
-                            View calculation history →
+                            View calculation history
                         </button>
                     </div>
                 )}

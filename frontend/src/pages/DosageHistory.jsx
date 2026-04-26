@@ -80,7 +80,7 @@ export default function DosageHistory() {
 };
 
 return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="app-shell">
     <Navbar
         links={[
             { label: '← Calculator', onClick: () => navigate('/dosage') },
@@ -137,7 +137,7 @@ return (
                                 className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                             />
                             {search && (
-                                <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">✕</button>
+                                <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs">Clear</button>
                             )}
                         </div>
                 <select
@@ -187,7 +187,7 @@ return (
                             )}
                             {!search && (
                                 <button onClick={() => navigate('/dosage')} className="text-blue-500 text-sm mt-2 hover:underline block mx-auto">
-                                    Start calculating →
+                                    Start calculating
                                 </button>
                             )}
                         </div>

@@ -15,9 +15,11 @@ export default function DoctorDashboard() {
     const [error, setError] = useState('');
     const [searchName, setSearchName] = useState('');
     const [sortOrder, setSortOrder] = useState('asc');
+    const [notifications, setNotifications] = useState([]);
 
     useEffect(() => {
         fetchAppointments();
+        fetchNotifications();
     }, []);
 
     const fetchAppointments = async () => {
@@ -68,8 +70,33 @@ const updateStatus = async (id, status) => {
         console.error('Failed to update appointment status');
     }
 };
+
+const fetchNotifications = async () => {
+    try {
+        const res = await api.get('/notifications');
+        setNotifications(res.data || []);
+    } catch (err) {
+        console.error('Failed to fetch notifications');
+    }
+};
+
+const markNotificationRead = async (id) => {
+    try {
+        await api.patch(`/notifications/${id}/read`);
+        setNotifications((prev) =>
+            prev.map((n) => (n.id === id ? { ...n, read_at: n.read_at || new Date().toISOString() } : n))
+        );
+    } catch (err) {
+        console.error('Failed to mark notification as read');
+    }
+};
+const todayCount = appointments.filter(a =>
+    new Date(a.date).toDateString() === new Date().toDateString()
+).length;
+const upcomingCount = appointments.filter(a => new Date(a.date) > new Date()).length;
+const unreadCount = notifications.filter((n) => !n.read_at).length;
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="app-shell">
             <Navbar
                 userName={user?.name}
                 roleLabel="Doctor"
@@ -98,39 +125,50 @@ const updateStatus = async (id, status) => {
     )}
 
     {/* Welcome */}
-    <div className="mb-10">
-                    <h1 className="text-3xl font-bold text-[#0a1628]">
-                        Welcome, Dr. {user?.name?.split(' ')[0]} 👨‍⚕️
+    <div className="mb-8 rounded-3xl border border-blue-100 bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 p-7 text-white shadow-xl">
+                    <p className="text-blue-200 text-xs font-semibold uppercase tracking-wide">Doctor Workspace</p>
+                    <h1 className="text-3xl font-bold mt-2">
+                        Welcome back, Dr. {user?.name?.split(' ')[0]}
                     </h1>
-                    <p className="text-gray-500 mt-1">Here are your upcoming appointments.</p>
+                    <p className="text-blue-100 mt-1 text-sm">Track visits, update statuses, and review dosage tasks from one dashboard.</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6">
+                        <div className="bg-white/10 border border-white/20 rounded-2xl p-4">
+                            <p className="text-blue-100 text-xs">Appointments</p>
+                            <p className="text-2xl font-bold mt-1">{appointments.length}</p>
+                        </div>
+                        <div className="bg-white/10 border border-white/20 rounded-2xl p-4">
+                            <p className="text-blue-100 text-xs">Today</p>
+                            <p className="text-2xl font-bold mt-1">{todayCount}</p>
+                        </div>
+                        <div className="bg-white/10 border border-white/20 rounded-2xl p-4">
+                            <p className="text-blue-100 text-xs">Unread updates</p>
+                            <p className="text-2xl font-bold mt-1">{unreadCount}</p>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Stats */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
-                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                    <div className="bg-white/90 backdrop-blur rounded-2xl border border-slate-200 shadow-md p-6">
                         <p className="text-gray-400 text-sm">Total Appointments</p>
                         <p className="text-3xl font-bold text-[#0a1628] mt-1">{appointments.length}</p>
                     </div>
-                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                    <div className="bg-white/90 backdrop-blur rounded-2xl border border-slate-200 shadow-md p-6">
                         <p className="text-gray-400 text-sm">Today</p>
                         <p className="text-3xl font-bold text-[#0a1628] mt-1">
-                            {appointments.filter(a =>
-                                new Date(a.date).toDateString() === new Date().toDateString()
-                            ).length}
+                            {todayCount}
                         </p>
                     </div>
-                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                    <div className="bg-white/90 backdrop-blur rounded-2xl border border-slate-200 shadow-md p-6">
                         <p className="text-gray-400 text-sm">Upcoming</p>
                         <p className="text-3xl font-bold text-[#0a1628] mt-1">
-                            {appointments.filter(a =>
-                                new Date(a.date) > new Date()
-                            ).length}
+                            {upcomingCount}
                         </p>
                     </div>
                 </div>
 
                 {/* Search, Filter, Sort */}
-<div className="flex items-center gap-3 mb-6 flex-wrap">
+<div className="flex items-center gap-3 mb-6 flex-wrap bg-white/80 backdrop-blur rounded-2xl border border-slate-200 p-4 shadow-sm">
     <div className="relative flex-1 min-w-48">
         <svg className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -140,14 +178,14 @@ const updateStatus = async (id, status) => {
             placeholder="Search by patient name..."
             value={searchName}
             onChange={(e) => setSearchName(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+            className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition bg-slate-50"
         />
         {searchName && (
             <button
                 onClick={() => setSearchName('')}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
             >
-                ✕
+                Clear
             </button>
         )}
     </div>
@@ -156,13 +194,13 @@ const updateStatus = async (id, status) => {
         type="date"
         value={filterDate}
         onChange={(e) => setFilterDate(e.target.value)}
-        className="px-4 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+        className="px-4 py-3 border border-slate-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition bg-slate-50"
     />
 
     <select
         value={sortOrder}
         onChange={(e) => setSortOrder(e.target.value)}
-        className="px-4 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition bg-white"
+        className="px-4 py-3 border border-slate-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition bg-slate-50"
     >
         <option value="asc">Date: Oldest first</option>
         <option value="desc">Date: Newest first</option>
@@ -179,22 +217,57 @@ const updateStatus = async (id, status) => {
 </div>
 
 {/* Dosage Module Button */}
-<div className="bg-[#0a1628] rounded-2xl p-6 mb-8 flex items-center justify-between">
+<div className="bg-gradient-to-r from-blue-700 to-indigo-700 rounded-3xl p-6 mb-8 flex items-center justify-between shadow-lg">
     <div>
         <h2 className="text-white font-bold text-lg">Drug Dosage Calculator</h2>
-        <p className="text-blue-300 text-sm mt-1">Calculate safe pediatric drug doses by age and weight</p>
+        <p className="text-blue-100 text-sm mt-1">Calculate safe pediatric drug doses by age and weight.</p>
     </div>
     <button
         onClick={() => navigate('/dosage')}
-        className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-2.5 rounded-xl transition shrink-0"
+        className="bg-white text-blue-700 hover:bg-blue-50 font-semibold px-6 py-2.5 rounded-xl transition shrink-0"
     >
         Open Calculator
     </button>
 </div>
 
+                <div className="bg-white/90 backdrop-blur rounded-3xl shadow-lg border border-slate-200 p-6 mb-8">
+                    <h2 className="text-lg font-bold text-[#0a1628] mb-1">Notifications</h2>
+                    <p className="text-gray-400 text-sm mb-4">Assignment and schedule changes</p>
+                    {notifications.length === 0 ? (
+                        <p className="text-sm text-gray-400">No notifications yet.</p>
+                    ) : (
+                        <div className="space-y-2">
+                            {notifications.slice(0, 6).map((n) => (
+                                <div
+                                    key={n.id}
+                                    className={`p-3 rounded-lg border text-sm ${
+                                        n.read_at ? 'border-gray-100 bg-white text-gray-500' : 'border-blue-100 bg-blue-50 text-[#0a1628]'
+                                    }`}
+                                >
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div>
+                                            <p className="font-semibold">{n.title}</p>
+                                            <p className="mt-1">{n.message}</p>
+                                        </div>
+                                        {!n.read_at && (
+                                            <button
+                                                type="button"
+                                                onClick={() => markNotificationRead(n.id)}
+                                                className="text-xs text-blue-600 hover:text-blue-700 underline shrink-0"
+                                            >
+                                                Mark read
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
 
                 {/* Appointments */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white/90 backdrop-blur rounded-3xl shadow-lg border border-slate-200 p-6">
                     <h2 className="text-lg font-bold text-[#0a1628] mb-1">Patient Appointments</h2>
                     <p className="text-gray-400 text-sm mb-6">All appointments scheduled with you</p>
 
