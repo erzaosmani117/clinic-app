@@ -41,4 +41,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(DosageHistory::class, 'doctor_id');
     }
+
+    public function notifications()
+    {
+        return $this->hasMany(UserNotification::class)->orderByDesc('created_at');
+    }
 }

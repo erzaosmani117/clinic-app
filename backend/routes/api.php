@@ -9,6 +9,7 @@ use App\Http\Controllers\DrugController;
 use App\Http\Controllers\DosageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\NotificationController;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -21,6 +22,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update']);
     
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::patch('/notifications/{id}/read', [NotificationController::class, 'markRead']);
     Route::get('/file-appointments', [FileAppointmentController::class, 'index']);
     Route::get('/file-appointments/{id}', [FileAppointmentController::class, 'show']);
     Route::post('/file-appointments', [FileAppointmentController::class, 'store']);
@@ -55,6 +58,7 @@ Route::middleware('role:admin')->group(function () {
     Route::post('/admin/doctors', [AdminController::class, 'addDoctor']);
     Route::delete('/admin/users/{id}', [AdminController::class, 'deleteUser']);
     Route::get('/admin/appointments', [AdminController::class, 'appointments']);
+    Route::patch('/admin/appointments/{id}', [AdminController::class, 'updateAppointment']);
     Route::get('/admin/drug-categories', [AdminController::class, 'drugCategories']);
     Route::post('/admin/drugs', [AdminController::class, 'addDrug']);
     Route::delete('/admin/drugs/{id}', [AdminController::class, 'deleteDrug']);
