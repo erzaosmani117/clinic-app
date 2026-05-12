@@ -52,10 +52,9 @@ function AdminDashboard() {
         }, {})
       );
 
-      // Doctors list for reassigning and filtering (safe, additive)
       const docsRes = await api.get('/admin/users', { params: { role: 'doctor' } });
       setDoctors(docsRes.data || []);
-    } catch (err) {
+    } catch {
       setError('Failed to load admin dashboard data. Please try again.');
     } finally {
       setLoading(false);
@@ -70,17 +69,17 @@ function AdminDashboard() {
     try {
       await api.post('/logout');
     } catch {
-      // ignore network/logout errors; still clear local session
+      /* ignore */
     }
     logout();
     navigate('/login');
   };
 
   const statusPill = (status) => {
-    const base = 'text-xs font-medium px-3 py-1 rounded-full';
-    if (status === 'confirmed') return `${base} bg-green-100 text-green-700`;
-    if (status === 'pending') return `${base} bg-yellow-100 text-yellow-700`;
-    return `${base} bg-red-100 text-red-600`;
+    const base = 'inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold';
+    if (status === 'confirmed') return `${base} bg-emerald-100 text-emerald-800`;
+    if (status === 'pending') return `${base} bg-amber-100 text-amber-900`;
+    return `${base} bg-rose-100 text-rose-800`;
   };
 
   const onFilterChange = (e) => {
@@ -135,7 +134,7 @@ function AdminDashboard() {
     }
 
     if (Object.keys(patch).length === 0) {
-      setError('No date/doctor changes to save for this appointment.');
+      setError('No date or physician change to save for this row.');
       return;
     }
 
@@ -145,7 +144,11 @@ function AdminDashboard() {
   const formatDate = (date) => {
     if (!date) return '—';
     try {
-      return new Date(date).toLocaleDateString('en-US');
+      return new Date(date).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
     } catch {
       return String(date);
     }
@@ -156,195 +159,156 @@ function AdminDashboard() {
   const pendingAppointments = stats?.appointments?.pending ?? 0;
 
   return (
-    <div className="app-shell">
+    <div className="app-shell min-h-screen">
       <Navbar
         userName={user?.name}
         roleLabel="Admin"
-        links={[
-          { label: 'Home', onClick: () => navigate('/') },
-        ]}
+        links={[{ label: 'Public site', onClick: () => navigate('/') }]}
         showLogout
         onLogout={handleLogout}
       />
 
-      <div className="max-w-6xl mx-auto px-6 py-10">
-        <div className="mb-8 rounded-3xl border border-blue-100 bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 p-7 text-white shadow-xl flex items-start justify-between gap-4 flex-wrap">
+      <div className="page-container">
+        <header className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-blue-200 text-xs font-semibold uppercase tracking-wide">Admin Workspace</p>
-            <h1 className="text-3xl font-bold mt-2">Admin Console</h1>
-            <p className="text-blue-100 mt-1 text-sm">Operational overview of users, appointments, and medication catalog.</p>
-            <div className="flex items-center gap-3 mt-4 flex-wrap">
-              <span className="bg-white/10 border border-white/20 rounded-xl px-3 py-1.5 text-xs">Users: {totalUsers}</span>
-              <span className="bg-white/10 border border-white/20 rounded-xl px-3 py-1.5 text-xs">Appointments: {totalAppointments}</span>
-              <span className="bg-white/10 border border-white/20 rounded-xl px-3 py-1.5 text-xs">Pending: {pendingAppointments}</span>
-            </div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-blue-600">Operations</p>
+            <h1 className="font-display mt-2 text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">Admin console</h1>
+            <p className="mt-2 text-sm text-slate-600 max-w-xl">
+              Search the schedule, update status, reschedule visits, and reassign physicians. Changes notify patients and affected doctors.
+            </p>
           </div>
           <button
             type="button"
             onClick={() => fetchAll(filters)}
-            className="text-sm text-blue-700 bg-white hover:bg-blue-50 border border-blue-100 px-3 py-2 rounded-lg transition"
-            title="Refresh dashboard"
+            className="btn-secondary self-start sm:self-auto py-2.5 text-sm"
           >
-            Refresh
+            Refresh data
           </button>
+        </header>
+
+        <div className="mb-6 flex flex-wrap gap-2 text-xs">
+          <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 font-medium text-slate-700 shadow-sm">
+            Users <strong className="ml-1 text-slate-900">{totalUsers}</strong>
+          </span>
+          <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 font-medium text-slate-700 shadow-sm">
+            Appointments <strong className="ml-1 text-slate-900">{totalAppointments}</strong>
+          </span>
+          <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 font-medium text-amber-900">
+            Pending <strong className="ml-1">{pendingAppointments}</strong>
+          </span>
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6 text-sm">
-            {error}
-          </div>
+          <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{error}</div>
         )}
 
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="bg-white/90 backdrop-blur rounded-2xl border border-slate-200 p-6 animate-pulse shadow-sm">
-                <div className="h-4 bg-gray-100 rounded w-2/3 mb-4"></div>
-                <div className="h-8 bg-gray-100 rounded w-1/3"></div>
-              </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="surface-card h-28 animate-pulse rounded-2xl bg-slate-100/80" />
             ))}
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-              <div className="bg-white/90 backdrop-blur rounded-2xl border border-slate-200 shadow-md p-6">
-                <p className="text-gray-400 text-sm">Users</p>
-                <p className="text-3xl font-bold text-[#0a1628] mt-1">{stats?.users?.total ?? 0}</p>
-                <p className="text-gray-400 text-xs mt-2">
-                  Patients: {stats?.users?.patients ?? 0} · Doctors: {stats?.users?.doctors ?? 0} · Admins: {stats?.users?.admins ?? 0}
+            <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="surface-card-lg p-6">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Directory</p>
+                <p className="font-display mt-1 text-3xl font-bold text-slate-900">{stats?.users?.total ?? 0}</p>
+                <p className="mt-2 text-xs text-slate-500 leading-relaxed">
+                  Patients {stats?.users?.patients ?? 0} · Doctors {stats?.users?.doctors ?? 0} · Admins {stats?.users?.admins ?? 0}
                 </p>
               </div>
-              <div className="bg-white/90 backdrop-blur rounded-2xl border border-slate-200 shadow-md p-6">
-                <p className="text-gray-400 text-sm">Appointments</p>
-                <p className="text-3xl font-bold text-[#0a1628] mt-1">{stats?.appointments?.total ?? 0}</p>
-                <p className="text-gray-400 text-xs mt-2">
-                  Pending: {stats?.appointments?.pending ?? 0} · Confirmed: {stats?.appointments?.confirmed ?? 0} · Cancelled: {stats?.appointments?.cancelled ?? 0}
+              <div className="surface-card-lg p-6">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Appointments</p>
+                <p className="font-display mt-1 text-3xl font-bold text-slate-900">{stats?.appointments?.total ?? 0}</p>
+                <p className="mt-2 text-xs text-slate-500">
+                  Pending {stats?.appointments?.pending ?? 0} · Confirmed {stats?.appointments?.confirmed ?? 0} · Cancelled{' '}
+                  {stats?.appointments?.cancelled ?? 0}
                 </p>
               </div>
-              <div className="bg-white/90 backdrop-blur rounded-2xl border border-slate-200 shadow-md p-6">
-                <p className="text-gray-400 text-sm">Drug Catalog</p>
-                <p className="text-3xl font-bold text-[#0a1628] mt-1">{stats?.drugs?.drugs ?? 0}</p>
-                <p className="text-gray-400 text-xs mt-2">
-                  Categories: {stats?.drugs?.categories ?? 0}
-                </p>
+              <div className="surface-card-lg p-6">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Drug catalog</p>
+                <p className="font-display mt-1 text-3xl font-bold text-slate-900">{stats?.drugs?.drugs ?? 0}</p>
+                <p className="mt-2 text-xs text-slate-500">{stats?.drugs?.categories ?? 0} categories</p>
               </div>
             </div>
 
-            <div className="bg-white/90 backdrop-blur rounded-3xl border border-slate-200 shadow-lg p-6">
-              <div className="flex items-center justify-between gap-4 mb-4 flex-wrap">
-                <div>
-                  <h2 className="text-lg font-bold text-[#0a1628]">Appointments</h2>
-                  <p className="text-gray-400 text-sm">Manage bookings across the clinic</p>
+            <div className="table-shell">
+              <div className="border-b border-slate-200 bg-slate-50/90 px-6 py-5">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                  <div>
+                    <h2 className="font-display text-lg font-bold text-slate-900">Appointment ledger</h2>
+                    <p className="text-xs text-slate-500 mt-0.5">Filter, then apply. Row actions save individually.</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button type="button" onClick={applyFilters} className="btn-primary py-2 px-4 text-sm">
+                      Apply filters
+                    </button>
+                    <button type="button" onClick={clearFilters} className="btn-secondary py-2 px-4 text-sm">
+                      Clear
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <button
-                    type="button"
-                    onClick={applyFilters}
-                    className="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition"
-                  >
-                    Apply
-                  </button>
-                  <button
-                    type="button"
-                    onClick={clearFilters}
-                    className="text-sm text-gray-500 hover:text-blue-600 border border-gray-200 hover:border-blue-200 px-3 py-2 rounded-lg transition"
-                  >
-                    Clear
-                  </button>
-                </div>
-              </div>
 
-              {/* Filters */}
-              <div className="flex items-center gap-3 mb-5 flex-wrap">
-                <div className="relative flex-1 min-w-56">
+                <div className="mt-5 flex flex-wrap gap-3">
                   <input
                     type="text"
                     name="q"
                     value={filters.q}
                     onChange={onFilterChange}
-                    placeholder="Search patient or doctor name/email..."
-                    className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition bg-slate-50"
+                    placeholder="Search patient or doctor…"
+                    className="input-pro min-w-[200px] flex-1 max-w-md"
                   />
+                  <select name="status" value={filters.status} onChange={onFilterChange} className="input-pro w-full sm:w-40">
+                    <option value="">All statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                  <select name="doctor_id" value={filters.doctor_id} onChange={onFilterChange} className="input-pro w-full sm:min-w-[12rem]">
+                    <option value="">All doctors</option>
+                    {doctors.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        Dr. {d.name}
+                      </option>
+                    ))}
+                  </select>
+                  <input type="date" name="date_from" value={filters.date_from} onChange={onFilterChange} className="input-pro w-full sm:w-auto" title="From" />
+                  <input type="date" name="date_to" value={filters.date_to} onChange={onFilterChange} className="input-pro w-full sm:w-auto" title="To" />
                 </div>
-
-                <select
-                  name="status"
-                  value={filters.status}
-                  onChange={onFilterChange}
-                  className="px-4 py-3 border border-slate-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition bg-slate-50"
-                >
-                  <option value="">All statuses</option>
-                  <option value="pending">Pending</option>
-                  <option value="confirmed">Confirmed</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
-
-                <select
-                  name="doctor_id"
-                  value={filters.doctor_id}
-                  onChange={onFilterChange}
-                  className="px-4 py-3 border border-slate-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition bg-slate-50 min-w-56"
-                >
-                  <option value="">All doctors</option>
-                  {doctors.map((d) => (
-                    <option key={d.id} value={d.id}>Dr. {d.name}</option>
-                  ))}
-                </select>
-
-                <input
-                  type="date"
-                  name="date_from"
-                  value={filters.date_from}
-                  onChange={onFilterChange}
-                  className="px-4 py-3 border border-slate-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition bg-slate-50"
-                  title="From date"
-                />
-                <input
-                  type="date"
-                  name="date_to"
-                  value={filters.date_to}
-                  onChange={onFilterChange}
-                  className="px-4 py-3 border border-slate-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition bg-slate-50"
-                  title="To date"
-                />
               </div>
 
               {appointments.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-gray-500 font-medium">No appointments yet</p>
-                  <p className="text-gray-400 text-sm mt-1">Try clearing filters or wait for bookings.</p>
-                </div>
+                <div className="py-16 text-center text-slate-500 text-sm">No rows match these filters.</div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full">
+                  <table className="w-full min-w-[900px] text-left text-sm">
                     <thead>
-                      <tr className="text-left">
-                        <th className="text-xs font-semibold text-gray-400 uppercase tracking-wider pb-3 pr-4">Patient</th>
-                        <th className="text-xs font-semibold text-gray-400 uppercase tracking-wider pb-3 pr-4">Doctor</th>
-                        <th className="text-xs font-semibold text-gray-400 uppercase tracking-wider pb-3 pr-4">Date</th>
-                        <th className="text-xs font-semibold text-gray-400 uppercase tracking-wider pb-3">Status</th>
-                        <th className="text-xs font-semibold text-gray-400 uppercase tracking-wider pb-3 pl-4">Actions</th>
+                      <tr className="border-b border-slate-200 bg-white text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                        <th className="px-4 py-3">Patient</th>
+                        <th className="px-4 py-3">Physician</th>
+                        <th className="px-4 py-3">Date</th>
+                        <th className="px-4 py-3">Status</th>
+                        <th className="px-4 py-3">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-50">
+                    <tbody className="divide-y divide-slate-100">
                       {appointments.map((apt) => (
-                        <tr key={apt.id} className="hover:bg-gray-50/50 transition">
-                          <td className="py-3 pr-4 text-sm text-[#0a1628]">{apt.patient?.name || '—'}</td>
-                          <td className="py-3 pr-4 text-sm text-gray-600">{apt.doctor?.name || '—'}</td>
-                          <td className="py-3 pr-4 text-sm text-gray-600">
-                            {formatDate(apt.date)}
-                          </td>
-                          <td className="py-3">
+                        <tr key={apt.id} className="hover:bg-slate-50/90 transition-colors">
+                          <td className="px-4 py-3 font-medium text-slate-900">{apt.patient?.name || '—'}</td>
+                          <td className="px-4 py-3 text-slate-600">{apt.doctor?.name || '—'}</td>
+                          <td className="px-4 py-3 text-slate-700 whitespace-nowrap">{formatDate(apt.date)}</td>
+                          <td className="px-4 py-3">
                             <span className={statusPill(apt.status)}>{apt.status}</span>
                           </td>
-                          <td className="py-3 pl-4">
-                            <div className="flex items-center gap-2 flex-wrap">
+                          <td className="px-4 py-3">
+                            <div className="flex flex-wrap items-center gap-2">
                               {apt.status !== 'confirmed' && (
                                 <button
                                   type="button"
                                   disabled={savingId === apt.id}
                                   onClick={() => updateAppointment(apt.id, { status: 'confirmed' })}
-                                  className="text-xs bg-green-500 hover:bg-green-600 text-white px-2.5 py-1 rounded-lg transition disabled:opacity-50"
+                                  className="rounded-lg bg-emerald-600 px-2 py-1 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
                                 >
                                   Confirm
                                 </button>
@@ -354,48 +318,40 @@ function AdminDashboard() {
                                   type="button"
                                   disabled={savingId === apt.id}
                                   onClick={() => updateAppointment(apt.id, { status: 'cancelled' })}
-                                  className="text-xs bg-red-500 hover:bg-red-600 text-white px-2.5 py-1 rounded-lg transition disabled:opacity-50"
+                                  className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
                                 >
                                   Cancel
                                 </button>
                               )}
-
-                              <label className="text-xs text-gray-400">
-                                <span className="sr-only">Reschedule date</span>
-                                <input
-                                  type="date"
-                                  value={appointmentDrafts[apt.id]?.date || ''}
-                                  disabled={savingId === apt.id}
-                                  onChange={(e) => {
-                                    updateDraft(apt.id, { date: e.target.value });
-                                  }}
-                                  className="text-xs px-2 py-1 border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-                                  title="Reschedule (select a new date)"
-                                />
-                              </label>
-
+                              <input
+                                type="date"
+                                value={appointmentDrafts[apt.id]?.date || ''}
+                                disabled={savingId === apt.id}
+                                onChange={(e) => updateDraft(apt.id, { date: e.target.value })}
+                                className="rounded-lg border border-slate-200 px-2 py-1 text-xs focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                title="Reschedule"
+                              />
                               <select
                                 value={appointmentDrafts[apt.id]?.doctor_id || ''}
                                 disabled={savingId === apt.id}
-                                onChange={(e) => {
-                                  updateDraft(apt.id, { doctor_id: e.target.value });
-                                }}
-                                className="text-xs px-2 py-1 border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition bg-white"
-                                title="Reassign doctor"
+                                onChange={(e) => updateDraft(apt.id, { doctor_id: e.target.value })}
+                                className="max-w-[140px] rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs focus:border-blue-400 focus:outline-none"
+                                title="Reassign"
                               >
-                                <option value="">Reassign…</option>
+                                <option value="">Physician…</option>
                                 {doctors.map((d) => (
-                                  <option key={d.id} value={d.id}>Dr. {d.name}</option>
+                                  <option key={d.id} value={d.id}>
+                                    Dr. {d.name}
+                                  </option>
                                 ))}
                               </select>
-
                               <button
                                 type="button"
                                 disabled={savingId === apt.id}
                                 onClick={() => saveDraft(apt)}
-                                className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded-lg transition disabled:opacity-50"
+                                className="rounded-lg bg-blue-600 px-2 py-1 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
                               >
-                                Save
+                                Save row
                               </button>
                             </div>
                           </td>
@@ -413,4 +369,4 @@ function AdminDashboard() {
   );
 }
 
-export default AdminDashboard
+export default AdminDashboard;

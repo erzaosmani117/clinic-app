@@ -81,10 +81,10 @@ export default function DosageHome() {
                 onLogout={handleLogout}
             />
 
-            <div className="max-w-6xl mx-auto px-6 py-10">
+            <div className="page-container">
                 <div className="rounded-3xl border border-blue-100 bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 p-8 text-white shadow-xl mb-8">
                     <p className="text-blue-200 text-xs font-semibold uppercase tracking-wide">Clinical Decision Support</p>
-                    <h1 className="text-3xl font-bold mt-2">Drug Dosage Calculator</h1>
+                    <h1 className="font-display text-3xl font-bold mt-2 tracking-tight">Drug Dosage Calculator</h1>
                     <p className="text-blue-100 mt-2 text-sm">Select a treatment category to view medications and calculate pediatric dosage safely.</p>
                 </div>
 

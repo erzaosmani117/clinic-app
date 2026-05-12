@@ -88,10 +88,10 @@ return (
         ]}
     />
 
-    <div className="max-w-6xl mx-auto px-6 py-10">
+    <div className="page-container">
 
       <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-[#0a1628]">Dosage History</h1>
+                    <h1 className="font-display text-3xl font-bold text-slate-900 tracking-tight">Dosage History</h1>
                     <p className="text-gray-500 mt-1">All your past dosage calculations</p>
       </div>
 

@@ -51,7 +51,7 @@ export default function DosageDrugList() {
                 ]}
             />
 
-            <div className="max-w-6xl mx-auto px-6 py-10">
+            <div className="page-container">
 
                 {/* Header */}
                 <div className="mb-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -61,7 +61,7 @@ export default function DosageDrugList() {
                     >
                         ← Back to categories
                     </button>
-                    <h1 className="text-3xl font-bold text-slate-900">
+                    <h1 className="font-display text-3xl font-bold text-slate-900 tracking-tight">
                         {loading ? 'Loading...' : category?.name}
                     </h1>
                     <p className="text-slate-500 mt-1">Select a medication to open the dosage workflow</p>

@@ -144,7 +144,7 @@ export default function DosageCalculator() {
                 ]}
             />
 
-            <div className="max-w-4xl mx-auto px-6 py-10">
+            <div className="page-container max-w-4xl">
 
                 {/* Drug info card */}
                 <div className="bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 rounded-3xl p-7 mb-6 text-white shadow-xl">

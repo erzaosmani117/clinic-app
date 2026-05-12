@@ -5,7 +5,7 @@ import api from '../api/axios';
 import Navbar from '../components/Navbar';
 
 export default function Profile() {
-    const { user, login } = useAuth();
+    const { user, login, logout } = useAuth();
     const navigate = useNavigate();
 
     const [form, setForm] = useState({
@@ -114,107 +114,94 @@ export default function Profile() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <p className="text-gray-400">Loading profile...</p>
+            <div className="app-shell flex min-h-screen items-center justify-center">
+                <p className="text-sm text-slate-500">Loading profile…</p>
             </div>
         );
     }
 
     return (
-        <div className="app-shell">
+        <div className="app-shell min-h-screen">
             <Navbar
                 userName={user?.name}
                 roleLabel={user?.role === 'doctor' ? 'Doctor' : 'Patient'}
-                links={[
-                    { label: '← Back to Dashboard', onClick: () => navigate(backPath) },
-                ]}
+                links={[{ label: 'Dashboard', onClick: () => navigate(backPath) }]}
+                showLogout
+                onLogout={async () => {
+                    try {
+                        await api.post('/logout');
+                    } catch {
+                        /* ignore */
+                    }
+                    logout();
+                    navigate('/login');
+                }}
             />
 
-            <div className="max-w-2xl mx-auto px-6 py-10">
-
-                {/* Header */}
-                <div className="mb-8">
-                    <div className="w-16 h-16 bg-[#0a1628] rounded-2xl flex items-center justify-center mb-4">
-                        <span className="text-white text-2xl font-bold">
-                            {user?.name?.charAt(0).toUpperCase()}
-                        </span>
+            <div className="page-container max-w-2xl">
+                <div className="mb-8 flex items-start gap-5">
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 text-2xl font-bold text-white shadow-lg">
+                        {user?.name?.charAt(0).toUpperCase()}
                     </div>
-                    <h1 className="text-3xl font-bold text-[#0a1628]">My Profile</h1>
-                    <p className="text-gray-500 mt-1">
-                        {user?.role === 'doctor' ? 'Manage your professional information' : 'Manage your personal health information'}
-                    </p>
+                    <div>
+                        <p className="text-xs font-semibold uppercase tracking-widest text-blue-600">Account</p>
+                        <h1 className="font-display mt-1 text-3xl font-bold text-slate-900 tracking-tight">Profile</h1>
+                        <p className="mt-1 text-sm text-slate-600">
+                            {user?.role === 'doctor'
+                                ? 'Professional details visible to scheduling and patients.'
+                                : 'Demographics used for dosing guidance and allergy screening.'}
+                        </p>
+                    </div>
                 </div>
 
-                {/* Fetch error */}
                 {fetchError && (
-                    <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6 text-sm flex items-center gap-2">
-                        <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                    <div className="mb-6 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
                         {fetchError}
-                        <button onClick={fetchProfile} className="ml-auto underline">Retry</button>
+                        <button type="button" onClick={fetchProfile} className="ml-auto font-semibold underline">
+                            Retry
+                        </button>
                     </div>
                 )}
 
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-
-                    {/* Success */}
+                <div className="surface-card-lg p-6 sm:p-8">
                     {success && (
-                        <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-6 text-sm">
-                            {success}
-                        </div>
+                        <div className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">{success}</div>
                     )}
 
-                    {/* General error */}
                     {errors.general && (
-                        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6 text-sm">
-                            {errors.general}
-                        </div>
+                        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{errors.general}</div>
                     )}
 
                     <form onSubmit={handleSubmit} className="space-y-5">
-
-                        {/* Name — both roles */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">Full name</label>
                             <input
                                 type="text"
                                 name="name"
                                 value={form.name}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-2.5 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
-                                    errors.name ? 'border-red-300 bg-red-50' : 'border-gray-200'
-                                }`}
+                                className={`input-pro ${errors.name ? 'border-red-300 bg-red-50' : ''}`}
                             />
-                            {errors.name && (
-                                <p className="text-red-500 text-xs mt-1">{errors.name}</p>
-                            )}
+                            {errors.name && <p className="mt-1 text-xs text-red-600">{errors.name}</p>}
                         </div>
 
-                        {/* Email — readonly */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">Email</label>
                             <input
                                 type="email"
                                 value={user?.email}
                                 disabled
-                                className="w-full px-4 py-2.5 border border-gray-100 rounded-lg text-gray-400 bg-gray-50 cursor-not-allowed"
+                                className="input-pro cursor-not-allowed bg-slate-100 text-slate-500"
                             />
-                            <p className="text-gray-400 text-xs mt-1">Email cannot be changed</p>
+                            <p className="mt-1 text-xs text-slate-400">Managed by your clinic administrator.</p>
                         </div>
 
-                        {/* Doctor fields */}
                         {user?.role === 'doctor' && (
                             <>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Specialty</label>
-                                    <select
-                                        name="specialty"
-                                        value={form.specialty}
-                                        onChange={handleChange}
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition bg-white"
-                                    >
-                                        <option value="">-- Select specialty --</option>
+                                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">Specialty</label>
+                                    <select name="specialty" value={form.specialty} onChange={handleChange} className="input-pro">
+                                        <option value="">Select specialty</option>
                                         <option value="General Pediatrics">General Pediatrics</option>
                                         <option value="Pediatric Cardiology">Pediatric Cardiology</option>
                                         <option value="Pediatric Neurology">Pediatric Neurology</option>
@@ -224,29 +211,25 @@ export default function Profile() {
                                         <option value="Neonatology">Neonatology</option>
                                     </select>
                                 </div>
-
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">Bio</label>
                                     <textarea
                                         name="bio"
                                         value={form.bio}
                                         onChange={handleChange}
                                         rows={3}
-                                        placeholder="Brief description of your experience..."
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition resize-none"
+                                        placeholder="Brief clinical focus and training…"
+                                        className="input-pro resize-none min-h-[100px]"
                                     />
                                 </div>
                             </>
                         )}
 
-                        {/* Patient fields */}
                         {user?.role === 'patient' && (
                             <>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Age (months)
-                                        </label>
+                                        <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">Age (months)</label>
                                         <input
                                             type="number"
                                             name="age_months"
@@ -255,20 +238,13 @@ export default function Profile() {
                                             min="0"
                                             max="216"
                                             placeholder="e.g. 36"
-                                            className={`w-full px-4 py-2.5 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
-                                                errors.age_months ? 'border-red-300 bg-red-50' : 'border-gray-200'
-                                            }`}
+                                            className={`input-pro ${errors.age_months ? 'border-red-300 bg-red-50' : ''}`}
                                         />
-                                        {errors.age_months && (
-                                            <p className="text-red-500 text-xs mt-1">{errors.age_months}</p>
-                                        )}
-                                        <p className="text-gray-400 text-xs mt-1">1 year = 12 months</p>
+                                        {errors.age_months && <p className="mt-1 text-xs text-red-600">{errors.age_months}</p>}
+                                        <p className="mt-1 text-xs text-slate-400">12 months = 1 year</p>
                                     </div>
-
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Weight (kg)
-                                        </label>
+                                        <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">Weight (kg)</label>
                                         <input
                                             type="number"
                                             name="weight_kg"
@@ -278,38 +254,27 @@ export default function Profile() {
                                             max="150"
                                             step="0.1"
                                             placeholder="e.g. 20.5"
-                                            className={`w-full px-4 py-2.5 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
-                                                errors.weight_kg ? 'border-red-300 bg-red-50' : 'border-gray-200'
-                                            }`}
+                                            className={`input-pro ${errors.weight_kg ? 'border-red-300 bg-red-50' : ''}`}
                                         />
-                                        {errors.weight_kg && (
-                                            <p className="text-red-500 text-xs mt-1">{errors.weight_kg}</p>
-                                        )}
+                                        {errors.weight_kg && <p className="mt-1 text-xs text-red-600">{errors.weight_kg}</p>}
                                     </div>
                                 </div>
-
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Known Allergies
-                                    </label>
+                                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">Known allergies</label>
                                     <textarea
                                         name="allergies"
                                         value={form.allergies}
                                         onChange={handleChange}
                                         rows={3}
-                                        placeholder="e.g. Penicillin, Peanuts..."
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition resize-none"
+                                        placeholder="Medications, foods, latex…"
+                                        className="input-pro resize-none min-h-[88px]"
                                     />
                                 </div>
                             </>
                         )}
 
-                        <button
-                            type="submit"
-                            disabled={saving}
-                            className="w-full bg-[#0a1628] hover:bg-[#152340] text-white font-semibold py-2.5 rounded-lg transition disabled:opacity-50"
-                        >
-                            {saving ? 'Saving...' : 'Save Changes'}
+                        <button type="submit" disabled={saving} className="btn-primary w-full py-3.5 disabled:opacity-50">
+                            {saving ? 'Saving…' : 'Save changes'}
                         </button>
                     </form>
                 </div>
