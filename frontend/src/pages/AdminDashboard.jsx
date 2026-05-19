@@ -172,7 +172,7 @@ function AdminDashboard() {
         <header className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest text-blue-600">Operations</p>
-            <h1 className="font-display mt-2 text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">Admin console</h1>
+            <h1 className="font-display mt-2 text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">Admin Dashboard</h1>
             <p className="mt-2 text-sm text-slate-600 max-w-xl">
               Search the schedule, update status, reschedule visits, and reassign physicians. Changes notify patients and affected doctors.
             </p>
