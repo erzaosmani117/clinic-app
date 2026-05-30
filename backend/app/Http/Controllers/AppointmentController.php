@@ -17,12 +17,14 @@ class AppointmentController extends Controller
                 Rule::exists('users', 'id')->where(fn ($q) => $q->where('role', 'doctor')),
             ],
             'date'      => 'required|date|after:today',
+            'time'      => 'required|string',
         ]);
 
         $appointment = Appointment::create([
             'patient_id' => $request->user()->id,
             'doctor_id'  => $request->doctor_id,
             'date'       => $request->date,
+            'time'       => $request->time,
             'status'     => 'pending',
         ]);
 

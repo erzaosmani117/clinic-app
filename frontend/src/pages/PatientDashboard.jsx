@@ -88,6 +88,10 @@ export default function PatientDashboard() {
         e.preventDefault();
         setError('');
         setSuccess('');
+        if (!form.time) {
+       setError('Please select an available time slot.');
+       return;
+ }
         setLoading(true);
 
         const doctorIdForOptimistic = form.doctor_id;
@@ -95,7 +99,7 @@ export default function PatientDashboard() {
         try {
             const res = await api.post('/appointments', form);
             setSuccess('Request submitted. Your physician will confirm the visit.');
-            setForm({ doctor_id: '', date: '' });
+            setForm({ doctor_id: '', date: '', time: '' });
             const selectedDoctor = doctors.find((d) => String(d.id) === String(doctorIdForOptimistic));
             const created = {
                 ...res.data,
@@ -132,6 +136,33 @@ export default function PatientDashboard() {
     const unreadNotifications = notifications.filter((n) => !n.read_at).length;
     const selectedDoctor = doctors.find((d) => String(d.id) === String(form.doctor_id));
 
+    const [availableSlots, setAvailableSlots] = useState([]);
+    const [loadingSlots, setLoadingSlots] = useState(false);
+
+    // paste this inside your existing useEffect or add a new one
+    useEffect(() => {
+        if (form.doctor_id && form.date) {
+            fetchSlots(form.doctor_id, form.date);
+        } else {
+            setAvailableSlots([]);
+            setForm((prev) => ({ ...prev, time: '' }));
+        }
+    }, [form.doctor_id, form.date]);
+
+    const fetchSlots = async (doctorId, date) => {
+        setLoadingSlots(true);
+        setAvailableSlots([]);
+        setForm((prev) => ({ ...prev, time: '' }));
+        try {
+            const res = await api.get(`/doctors/${doctorId}/available-slots?date=${date}`);
+            setAvailableSlots(res.data.slots || []);
+        } catch {
+            setAvailableSlots([]);
+        } finally {
+            setLoadingSlots(false);
+        }
+    };
+
     return (
         <div className="app-shell min-h-screen">
             <Navbar
@@ -154,15 +185,15 @@ export default function PatientDashboard() {
                         </p>
                     </div>
                     <div className="flex flex-wrap gap-3">
-                        <div className="surface-card rounded-2xl px-4 py-3 min-w-[7rem]">
+                        <div className="surface-card rounded-2xl px-4 py-3 ">
                             <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Upcoming</p>
                             <p className="font-display text-2xl font-bold text-slate-900">{upcomingCount}</p>
                         </div>
-                        <div className="surface-card rounded-2xl px-4 py-3 min-w-[7rem]">
+                        <div className="surface-card rounded-2xl px-4 py-3 ">
                             <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Confirmed</p>
                             <p className="font-display text-2xl font-bold text-emerald-700">{confirmedCount}</p>
                         </div>
-                        <div className="surface-card rounded-2xl px-4 py-3 min-w-[7rem]">
+                        <div className="surface-card rounded-2xl px-4 py-3 ">
                             <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Unread</p>
                             <p className="font-display text-2xl font-bold text-blue-700">{unreadNotifications}</p>
                         </div>
@@ -173,7 +204,7 @@ export default function PatientDashboard() {
                     {/* Schedule column */}
                     <aside className="xl:col-span-4 space-y-6">
                         <div className="surface-card-lg overflow-hidden">
-                            <div className="border-b border-slate-100 bg-gradient-to-r from-slate-50 to-blue-50/50 px-6 py-5">
+                            <div className="border-b border-slate-100 from-slate-50 to-blue-50/50 px-6 py-5">
                                 <h2 className="font-display text-lg font-bold text-slate-900">New appointment</h2>
                                 <p className="mt-1 text-xs text-slate-500">Three steps. You can change selections before submitting.</p>
                             </div>
@@ -244,35 +275,95 @@ export default function PatientDashboard() {
                                         </div>
                                     </div>
 
+                                    {/* Step 3 — Date */}
                                     <div className="flex gap-4">
                                         <div className="flex flex-col items-center">
-                                            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
-                                                3
-                                            </span>
+                                            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">3</span>
+                                            <span className="mt-2 w-px flex-1 min-h-[2rem] bg-slate-200" />
                                         </div>
-                                        <div className="flex-1">
+                                        <div className="flex-1 pb-2">
                                             <label className="mb-1.5 block text-xs font-semibold text-slate-500">Preferred date</label>
                                             <input
                                                 type="date"
                                                 min={today}
                                                 value={form.date}
-                                                onChange={(e) => setForm({ ...form, date: e.target.value })}
+                                                onChange={(e) => setForm({ ...form, date: e.target.value, time: '' })}
                                                 required
                                                 className="input-pro"
                                             />
                                         </div>
                                     </div>
 
+                                    {/* Step 4 — Time slot */}
+                                    <div className="flex gap-4">
+                                        <div className="flex flex-col items-center">
+                                            <span className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white ${form.doctor_id && form.date ? 'bg-blue-600' : 'bg-slate-300'}`}>
+                                                4
+                                            </span>
+                                        </div>
+                                        <div className="flex-1">
+                                            <label className="mb-1.5 block text-xs font-semibold text-slate-500">
+                                                Available time slots
+                                                {form.doctor_id && form.date && (
+                                                    <span className="ml-2 text-blue-500 font-normal">
+                                                        {loadingSlots ? 'Loading...' : `${availableSlots.length} available`}
+                                                    </span>
+                                                )}
+                                            </label>
+
+                                            {!form.doctor_id || !form.date ? (
+                                                <p className="text-xs text-slate-400 italic">Select a doctor and date first</p>
+                                            ) : loadingSlots ? (
+                                                <div className="grid grid-cols-3 gap-2">
+                                                    {[...Array(6)].map((_, i) => (
+                                                        <div key={i} className="h-9 rounded-lg bg-slate-100 animate-pulse" />
+                                                    ))}
+                                                </div>
+                                            ) : availableSlots.length === 0 ? (
+                                                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                                                    No available slots for this date. Please choose another day.
+                                                </div>
+                                            ) : (
+                                                <div className="grid grid-cols-3 gap-2">
+                                                    {availableSlots.map((slot) => (
+                                                        <button
+                                                            key={slot}
+                                                            type="button"
+                                                            onClick={() => setForm((prev) => ({ ...prev, time: slot }))}
+                                                            className={`rounded-lg px-2 py-2 text-sm font-medium transition-all border ${
+                                                                form.time === slot
+                                                                    ? 'bg-blue-600 text-white border-blue-600 shadow-md'
+                                                                    : 'bg-white text-slate-700 border-slate-200 hover:border-blue-400 hover:text-blue-600'
+                                                            }`}
+                                                        >
+                                                            {slot}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Selected doctor preview */}
                                     {selectedDoctor && (
                                         <div className="rounded-xl border border-blue-100 bg-blue-50/60 px-4 py-3 text-sm">
                                             <p className="font-semibold text-slate-900">Dr. {selectedDoctor.name}</p>
                                             {selectedDoctor.specialty && (
                                                 <p className="text-xs text-slate-600 mt-0.5">{selectedDoctor.specialty}</p>
                                             )}
+                                            {form.date && form.time && (
+                                                <p className="text-xs text-blue-700 font-medium mt-1">
+                                                    {form.date} at {form.time}
+                                                </p>
+                                            )}
                                         </div>
                                     )}
 
-                                    <button type="submit" disabled={loading} className="btn-primary w-full py-3.5 disabled:opacity-50">
+                                    <button
+                                        type="submit"
+                                        disabled={loading || !form.time}
+                                        className="btn-primary w-full py-3.5 disabled:opacity-50"
+                                    >
                                         {loading ? 'Submitting…' : 'Request appointment'}
                                     </button>
                                 </form>

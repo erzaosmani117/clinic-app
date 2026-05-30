@@ -46,4 +46,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserNotification::class)->orderByDesc('created_at');
     }
+
+    public function schedules() {
+    return $this->hasMany(DoctorSchedule::class, 'doctor_id');
+}
 }

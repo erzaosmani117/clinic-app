@@ -34,7 +34,7 @@ class DosageCalculatorTest extends TestCase
         $this->assertNull($result['age_warning']);
     }
 
-    // Test 2 — Doza tejkalon maksimumin, duhet të kufizohet
+    // Test 2 — Doza tejkalon maksimumin, duhet te kufizohet
     public function test_dose_is_capped_at_maximum()
     {
         $drug = new Drug();
@@ -52,7 +52,7 @@ class DosageCalculatorTest extends TestCase
         $this->assertTrue($result['was_capped']);
     }
 
-    // Test 3 — Mosha nën minimale, duhet të shfaqë warning
+    // Test 3 — Mosha nen minimale, duhet te shfaqe warning
     public function test_age_warning_when_patient_too_young()
     {
         $drug = new Drug();

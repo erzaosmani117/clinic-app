@@ -162,15 +162,16 @@ class AdminController extends Controller
 
     public function updateAppointment(Request $request, $id)
     {
-        $data = $request->validate([
-            'status' => 'sometimes|in:pending,confirmed,cancelled',
-            'date' => 'sometimes|date|after_or_equal:today',
-            'doctor_id' => [
-                'sometimes',
-                'integer',
-                Rule::exists('users', 'id')->where(fn ($q) => $q->where('role', 'doctor')),
-            ],
-        ]);
+       $data = $request->validate([
+    'status'    => 'sometimes|in:pending,confirmed,cancelled',
+    'date'      => 'sometimes|date|after_or_equal:today',
+    'time'      => 'sometimes|string',   // ← shto këtë
+    'doctor_id' => [
+        'sometimes',
+        'integer',
+        Rule::exists('users', 'id')->where(fn ($q) => $q->where('role', 'doctor')),
+    ],
+]);
 
         if (empty($data)) {
             return response()->json([

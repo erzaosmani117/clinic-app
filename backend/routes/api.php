@@ -34,15 +34,19 @@ Route::middleware('auth:sanctum')->group(function () {
    Route::middleware('role:patient')->group(function () {
     Route::get('/doctors', [DoctorController::class, 'index']);
     Route::get('/doctors/specialties', [DoctorController::class, 'specialties']);
+    Route::get('/doctors/{id}/available-slots', [DoctorController::class, 'availableSlots']);
+    
     Route::post('/appointments', [AppointmentController::class, 'store']);
     Route::get('/my-appointments', [AppointmentController::class, 'patientAppointments']);
     
+     
 });
     // Doctor only routes
     Route::middleware('role:doctor')->group(function () {
     Route::get('/doctor-appointments', [AppointmentController::class, 'doctorAppointments']);
     Route::patch('/appointments/{id}/status', [AppointmentController::class, 'updateStatus']);
 
+    
     // Dosage module
     Route::get('/drug-categories', [DrugController::class, 'categories']);
     Route::get('/drug-categories/{id}/drugs', [DrugController::class, 'drugsByCategory']);
