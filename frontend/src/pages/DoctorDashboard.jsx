@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import Navbar from '../components/Navbar';
+import AppointmentChat from '../components/AppointmentChat';
 
 export default function DoctorDashboard() {
     const { user, logout } = useAuth();
@@ -351,6 +352,8 @@ export default function DoctorDashboard() {
                                 </div>
                             )}
                         </div>
+
+                        <AppointmentChat title="Patient follow-ups" />
                     </div>
                 </div>
             </div>

@@ -8,6 +8,8 @@ function AdminDashboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
+  const [draftSlots, setDraftSlots] = useState({});
+  const [loadingDraftSlots, setLoadingDraftSlots] = useState({});
   const [stats, setStats] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [doctors, setDoctors] = useState([]);
@@ -45,9 +47,10 @@ function AdminDashboard() {
       setAppointmentDrafts(
         appts.reduce((acc, apt) => {
           acc[apt.id] = {
-            date: apt.date || '',
-            doctor_id: String(apt.doctor?.id || apt.doctor_id || ''),
-          };
+          date: apt.date || '',
+          doctor_id: String(apt.doctor?.id || apt.doctor_id || ''),
+          time: apt.time || '',   // ← shto këtë
+      };
           return acc;
         }, {})
       );
@@ -120,22 +123,36 @@ function AdminDashboard() {
     }));
   };
 
+  const fetchDraftSlots = async (aptId, doctorId, date) => {
+    if (!doctorId || !date) return;
+    setLoadingDraftSlots((prev) => ({ ...prev, [aptId]: true }));
+    try {
+        const res = await api.get(`/doctors/${doctorId}/available-slots?date=${date}`);
+        setDraftSlots((prev) => ({ ...prev, [aptId]: res.data.slots || [] }));
+    } catch {
+        setDraftSlots((prev) => ({ ...prev, [aptId]: [] }));
+    } finally {
+        setLoadingDraftSlots((prev) => ({ ...prev, [aptId]: false }));
+    }
+};
+
   const saveDraft = async (apt) => {
     const draft = appointmentDrafts[apt.id];
     if (!draft) return;
 
     const patch = {};
     if (draft.date && draft.date !== apt.date) patch.date = draft.date;
+    if (draft.time && draft.time !== apt.time) patch.time = draft.time;  // ← shto
 
     const selectedDoctorId = draft.doctor_id ? Number(draft.doctor_id) : null;
     const currentDoctorId = Number(apt.doctor?.id || apt.doctor_id || 0);
     if (selectedDoctorId && selectedDoctorId !== currentDoctorId) {
-      patch.doctor_id = selectedDoctorId;
+        patch.doctor_id = selectedDoctorId;
     }
 
     if (Object.keys(patch).length === 0) {
-      setError('No date or physician change to save for this row.');
-      return;
+        setError('No changes to save for this row.');
+        return;
     }
 
     await updateAppointment(apt.id, patch);
@@ -288,6 +305,7 @@ function AdminDashboard() {
                         <th className="px-4 py-3">Patient</th>
                         <th className="px-4 py-3">Physician</th>
                         <th className="px-4 py-3">Date</th>
+                        <th className="px-4 py-3">Time</th>
                         <th className="px-4 py-3">Status</th>
                         <th className="px-4 py-3">Actions</th>
                       </tr>
@@ -298,6 +316,7 @@ function AdminDashboard() {
                           <td className="px-4 py-3 font-medium text-slate-900">{apt.patient?.name || '—'}</td>
                           <td className="px-4 py-3 text-slate-600">{apt.doctor?.name || '—'}</td>
                           <td className="px-4 py-3 text-slate-700 whitespace-nowrap">{formatDate(apt.date)}</td>
+                          <td className="px-4 py-3 text-slate-700">{apt.time || '—'}</td> 
                           <td className="px-4 py-3">
                             <span className={statusPill(apt.status)}>{apt.status}</span>
                           </td>
@@ -323,36 +342,59 @@ function AdminDashboard() {
                                   Cancel
                                 </button>
                               )}
-                              <input
-                                type="date"
-                                value={appointmentDrafts[apt.id]?.date || ''}
-                                disabled={savingId === apt.id}
-                                onChange={(e) => updateDraft(apt.id, { date: e.target.value })}
-                                className="rounded-lg border border-slate-200 px-2 py-1 text-xs focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
-                                title="Reschedule"
-                              />
-                              <select
-                                value={appointmentDrafts[apt.id]?.doctor_id || ''}
-                                disabled={savingId === apt.id}
-                                onChange={(e) => updateDraft(apt.id, { doctor_id: e.target.value })}
-                                className="max-w-[140px] rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs focus:border-blue-400 focus:outline-none"
-                                title="Reassign"
-                              >
-                                <option value="">Physician…</option>
-                                {doctors.map((d) => (
-                                  <option key={d.id} value={d.id}>
-                                    Dr. {d.name}
-                                  </option>
-                                ))}
-                              </select>
-                              <button
-                                type="button"
-                                disabled={savingId === apt.id}
-                                onClick={() => saveDraft(apt)}
-                                className="rounded-lg bg-blue-600 px-2 py-1 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
-                              >
-                                Save row
-                              </button>
+                              {/* Date picker */}
+<input
+    type="date"
+    value={appointmentDrafts[apt.id]?.date || ''}
+    disabled={savingId === apt.id}
+    onChange={(e) => {
+        const newDate = e.target.value;
+        const doctorId = appointmentDrafts[apt.id]?.doctor_id || apt.doctor_id;
+        updateDraft(apt.id, { date: newDate, time: '' });
+        setDraftSlots((prev) => ({ ...prev, [apt.id]: [] }));
+        if (doctorId && newDate) fetchDraftSlots(apt.id, doctorId, newDate);
+    }}
+    className="rounded-lg border border-slate-200 px-2 py-1 text-xs focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
+    title="Reschedule"
+/>
+
+{/* Doctor picker */}
+<select
+    value={appointmentDrafts[apt.id]?.doctor_id || ''}
+    disabled={savingId === apt.id}
+    onChange={(e) => {
+        const newDoctorId = e.target.value;
+        const date = appointmentDrafts[apt.id]?.date || apt.date;
+        updateDraft(apt.id, { doctor_id: newDoctorId, time: '' });
+        setDraftSlots((prev) => ({ ...prev, [apt.id]: [] }));
+        if (newDoctorId && date) fetchDraftSlots(apt.id, newDoctorId, date);
+    }}
+    className="max-w-[140px] rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs focus:border-blue-400 focus:outline-none"
+    title="Reassign"
+>
+    <option value="">Physician…</option>
+    {doctors.map((d) => (
+        <option key={d.id} value={d.id}>Dr. {d.name}</option>
+    ))}
+</select>
+
+{/* Slot picker — shfaqet vetëm kur ka slots */}
+{(draftSlots[apt.id]?.length > 0 || loadingDraftSlots[apt.id]) && (
+    <select
+        value={appointmentDrafts[apt.id]?.time || ''}
+        disabled={savingId === apt.id || loadingDraftSlots[apt.id]}
+        onChange={(e) => updateDraft(apt.id, { time: e.target.value })}
+        className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs focus:border-blue-400 focus:outline-none"
+        title="Time slot"
+    >
+        <option value="">
+            {loadingDraftSlots[apt.id] ? 'Loading...' : 'Time slot…'}
+        </option>
+        {(draftSlots[apt.id] || []).map((slot) => (
+            <option key={slot} value={slot}>{slot}</option>
+        ))}
+    </select>
+)}
                             </div>
                           </td>
                         </tr>

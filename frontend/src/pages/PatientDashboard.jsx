@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import Navbar from '../components/Navbar';
+import AppointmentChat from '../components/AppointmentChat';
 
 export default function PatientDashboard() {
     const { user, logout } = useAuth();
@@ -476,6 +477,10 @@ export default function PatientDashboard() {
                                     </ul>
                                 </div>
                             )}
+                        </div>
+
+                        <div className="mt-8">
+                            <AppointmentChat title="Doctor chat and reports" />
                         </div>
                     </section>
                 </div>
