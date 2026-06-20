@@ -23,4 +23,14 @@ class Appointment extends Model
     {
         return $this->belongsTo(User::class, 'doctor_id');
     }
+
+    public function chatMessages()
+    {
+        return $this->hasMany(ChatMessage::class);
+    }
+
+    public function lastChatMessage()
+    {
+        return $this->hasOne(ChatMessage::class)->latestOfMany();
+    }
 }

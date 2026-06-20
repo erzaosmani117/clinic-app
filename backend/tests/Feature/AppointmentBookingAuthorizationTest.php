@@ -32,6 +32,7 @@ class AppointmentBookingAuthorizationTest extends TestCase
         $ok = $this->postJson('/api/appointments', [
             'doctor_id' => $doctor->id,
             'date' => now()->addDays(2)->toDateString(),
+            'time' => '09:00',
         ]);
 
         $ok->assertStatus(201);
@@ -39,6 +40,7 @@ class AppointmentBookingAuthorizationTest extends TestCase
         $badPatientTarget = $this->postJson('/api/appointments', [
             'doctor_id' => $patient->id,
             'date' => now()->addDays(3)->toDateString(),
+            'time' => '09:30',
         ]);
         $badPatientTarget->assertStatus(422);
         $badPatientTarget->assertJsonValidationErrors(['doctor_id']);
@@ -47,9 +49,9 @@ class AppointmentBookingAuthorizationTest extends TestCase
         $badAdminTarget = $this->postJson('/api/appointments', [
             'doctor_id' => $admin->id,
             'date' => now()->addDays(4)->toDateString(),
+            'time' => '10:00',
         ]);
         $badAdminTarget->assertStatus(422);
         $badAdminTarget->assertJsonValidationErrors(['doctor_id']);
     }
 }
-

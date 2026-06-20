@@ -188,6 +188,7 @@ class AdminController extends Controller
         $oldDoctorName = $appointment->doctor?->name;
         $oldDate = $appointment->date;
         $oldStatus = $appointment->status;
+        $oldTime       = $appointment->time;
 
         $appointment->fill($data);
 
@@ -205,20 +206,23 @@ class AdminController extends Controller
             'doctor:id,name,email',
         ]);
 
-        $dateChanged = array_key_exists('date', $data) && $oldDate !== $appointment->date;
-        $doctorChanged = array_key_exists('doctor_id', $data) && $oldDoctorId !== (int) $appointment->doctor_id;
+        $dateChanged   = array_key_exists('date', $data) && $oldDate !== $appointment->date;
+        $timeChanged   = array_key_exists('time', $data) && $oldTime !== $appointment->time;
+        $doctorChanged = array_key_exists('doctor_id', $data) && $oldDoctorId !== (int)         $appointment->doctor_id;
         $statusChanged = array_key_exists('status', $data) && $oldStatus !== $appointment->status;
 
         if ($dateChanged || $doctorChanged || $statusChanged) {
             $this->createAppointmentChangeNotifications(
                 $appointment,
-                $oldDoctorId,
-                $oldDoctorName,
-                $oldDate,
-                $oldStatus,
-                $dateChanged,
-                $doctorChanged,
-                $statusChanged
+        $oldDoctorId,
+        $oldDoctorName,
+        $oldDate,
+        $oldTime,       // ← shto
+        $oldStatus,
+        $dateChanged,
+        $timeChanged,   // ← shto
+        $doctorChanged,
+        $statusChanged
             );
         }
 
@@ -229,85 +233,99 @@ class AdminController extends Controller
     }
 
     private function createAppointmentChangeNotifications(
-        Appointment $appointment,
-        int $oldDoctorId,
-        ?string $oldDoctorName,
-        ?string $oldDate,
-        string $oldStatus,
-        bool $dateChanged,
-        bool $doctorChanged,
-        bool $statusChanged
-    ): void {
-        $patientId = $appointment->patient_id;
-        $newDoctorId = (int) $appointment->doctor_id;
-        $newDoctorName = $appointment->doctor?->name;
-        $patientName = $appointment->patient?->name ?? 'the patient';
-        $oldDateLabel = $oldDate ?: 'the previous date';
-        $newDateLabel = $appointment->date ?: 'the updated date';
+    Appointment $appointment,
+    int $oldDoctorId,
+    ?string $oldDoctorName,
+    ?string $oldDate,
+    ?string $oldTime,
+    string $oldStatus,
+    bool $dateChanged,
+    bool $timeChanged,
+    bool $doctorChanged,
+    bool $statusChanged
+): void {
+    $patientId    = $appointment->patient_id;
+    $newDoctorId  = (int) $appointment->doctor_id;
+    $newDoctorName = $appointment->doctor?->name;
+    $newTime      = $appointment->time ?? '';
+    $patientName  = $appointment->patient?->name ?? 'the patient';
+    $oldDateLabel = $oldDate ?: 'the previous date';
+    $newDateLabel = $appointment->date ?: 'the updated date';
 
-        $patientParts = [];
-        if ($doctorChanged) {
-            $patientParts[] = "doctor changed from Dr. {$oldDoctorName} to Dr. {$newDoctorName}";
-        }
-        if ($dateChanged) {
-            $patientParts[] = "date changed from {$oldDateLabel} to {$newDateLabel}";
-        }
-        if ($statusChanged) {
-            $patientParts[] = "status changed from {$oldStatus} to {$appointment->status}";
-        }
+    // Patient notification
+    $patientParts = [];
+    if ($doctorChanged) {
+        $patientParts[] = "doctor changed from Dr. {$oldDoctorName} to Dr. {$newDoctorName}";
+    }
+    if ($dateChanged) {
+        $patientParts[] = "date changed from {$oldDateLabel} to {$newDateLabel}";
+    }
+    if ($timeChanged) {
+        $patientParts[] = "time changed to {$newTime}";
+    }
+    if ($statusChanged) {
+        $patientParts[] = "status changed from {$oldStatus} to {$appointment->status}";
+    }
 
+    UserNotification::create([
+        'user_id' => $patientId,
+        'title'   => 'Appointment updated',
+        'message' => 'Your appointment was updated: ' . implode('; ', $patientParts) . '.',
+        'type'    => 'appointment_update',
+        'data'    => [
+            'appointment_id' => $appointment->id,
+            'doctor_changed' => $doctorChanged,
+            'date_changed'   => $dateChanged,
+            'time_changed'   => $timeChanged,
+            'status_changed' => $statusChanged,
+        ],
+    ]);
+
+    // Old doctor notification — only if doctor changed
+    if ($doctorChanged && $oldDoctorId > 0 && $oldDoctorId !== $newDoctorId) {
         UserNotification::create([
-            'user_id' => $patientId,
-            'title' => 'Appointment updated',
-            'message' => 'Your appointment was updated: ' . implode('; ', $patientParts) . '.',
-            'type' => 'appointment_update',
-            'data' => [
+            'user_id' => $oldDoctorId,
+            'title'   => 'Appointment reassigned',
+            'message' => "Appointment with {$patientName} on {$newDateLabel} was reassigned to Dr. {$newDoctorName}.",
+            'type'    => 'appointment_reassigned_from',
+            'data'    => [
                 'appointment_id' => $appointment->id,
-                'doctor_changed' => $doctorChanged,
-                'date_changed' => $dateChanged,
-                'status_changed' => $statusChanged,
-            ],
-        ]);
-
-        if ($doctorChanged && $oldDoctorId > 0 && $oldDoctorId !== $newDoctorId) {
-            UserNotification::create([
-                'user_id' => $oldDoctorId,
-                'title' => 'Appointment reassigned',
-                'message' => "Appointment with {$patientName} on {$newDateLabel} was reassigned to Dr. {$newDoctorName}.",
-                'type' => 'appointment_reassigned_from',
-                'data' => [
-                    'appointment_id' => $appointment->id,
-                    'patient_id' => $patientId,
-                    'new_doctor_id' => $newDoctorId,
-                ],
-            ]);
-        }
-
-        $newDoctorParts = [];
-        if ($doctorChanged) {
-            $newDoctorParts[] = "assigned to you from Dr. {$oldDoctorName}";
-        }
-        if ($dateChanged) {
-            $newDoctorParts[] = "date changed from {$oldDateLabel} to {$newDateLabel}";
-        }
-        if ($statusChanged) {
-            $newDoctorParts[] = "status changed from {$oldStatus} to {$appointment->status}";
-        }
-
-        UserNotification::create([
-            'user_id' => $newDoctorId,
-            'title' => 'Appointment updated',
-            'message' => "Appointment with {$patientName} was updated: " . implode('; ', $newDoctorParts) . '.',
-            'type' => $doctorChanged ? 'appointment_assigned' : 'appointment_update',
-            'data' => [
-                'appointment_id' => $appointment->id,
-                'patient_id' => $patientId,
-                'doctor_changed' => $doctorChanged,
-                'date_changed' => $dateChanged,
-                'status_changed' => $statusChanged,
+                'patient_id'     => $patientId,
+                'new_doctor_id'  => $newDoctorId,
             ],
         ]);
     }
+
+    // New doctor notification
+    $newDoctorParts = [];
+    if ($doctorChanged) {
+        $newDoctorParts[] = "assigned to you from Dr. {$oldDoctorName}";
+    }
+    if ($dateChanged) {
+        $newDoctorParts[] = "date changed from {$oldDateLabel} to {$newDateLabel}";
+    }
+    if ($timeChanged) {
+        $newDoctorParts[] = "time changed to {$newTime}";
+    }
+    if ($statusChanged) {
+        $newDoctorParts[] = "status changed from {$oldStatus} to {$appointment->status}";
+    }
+
+    UserNotification::create([
+        'user_id' => $newDoctorId,
+        'title'   => 'Appointment updated',
+        'message' => "Appointment with {$patientName} was updated: " . implode('; ', $newDoctorParts) . '.',
+        'type'    => $doctorChanged ? 'appointment_assigned' : 'appointment_update',
+        'data'    => [
+            'appointment_id' => $appointment->id,
+            'patient_id'     => $patientId,
+            'doctor_changed' => $doctorChanged,
+            'date_changed'   => $dateChanged,
+            'time_changed'   => $timeChanged,
+            'status_changed' => $statusChanged,
+        ],
+    ]);
+}
 
     public function drugCategories()
     {

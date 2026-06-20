@@ -10,6 +10,7 @@ use App\Http\Controllers\DosageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ChatController;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -24,6 +25,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::patch('/notifications/{id}/read', [NotificationController::class, 'markRead']);
+    Route::get('/chat/conversations', [ChatController::class, 'conversations']);
+    Route::get('/chat/appointments/{appointment}/messages', [ChatController::class, 'messages']);
+    Route::post('/chat/appointments/{appointment}/messages', [ChatController::class, 'store']);
+    Route::get('/chat/messages/{message}/attachment', [ChatController::class, 'download']);
     Route::get('/file-appointments', [FileAppointmentController::class, 'index']);
     Route::get('/file-appointments/{id}', [FileAppointmentController::class, 'show']);
     Route::post('/file-appointments', [FileAppointmentController::class, 'store']);
